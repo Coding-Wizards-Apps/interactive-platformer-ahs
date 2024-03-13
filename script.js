@@ -1,20 +1,20 @@
 let video;
 let canvas;
 let ctx;
-
+let newWidth = 640/4;
+let newHeight = 480/4;
 function setup() {
-  canvas = createCanvas(640, 480);
+  canvas = createCanvas(newWidth, newHeight);
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(newWidth, newHeight);
   video.hide();
 }
 
 function draw() {
-  image(video, 0, 0, width, height);
+  image(video, 0, 0, newWidth, newHeight);
   loadPixels();
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let index = (x + y * width) * 4;
+  for (let y = 0; y < pixels.length; y++) {
+      let index = (y) * 4;
       let r = pixels[index];
       let g = pixels[index + 1];
       let b = pixels[index + 2];
@@ -23,7 +23,6 @@ function draw() {
       pixels[index + 1] = closestColor[1];
       pixels[index + 2] = closestColor[2];
     }
-  }
   updatePixels();
 }
 
