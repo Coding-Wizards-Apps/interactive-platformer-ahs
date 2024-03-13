@@ -17,10 +17,16 @@ main {
 
 canvas {
     margin: 0 auto !important;
-    filter: blur(1px);
-    animation: animate 0.4s linear infinite alternate;
+    image-rendering: pixelated;
+    /* filter: blur(1px);
+    animation: animate 0.4s linear infinite alternate; */
 }
 
+
+#defaultCanvas0 {
+    width: 100vw !important;
+    height: auto !important;
+}
 @keyframes animate {
     0% {
         filter: blur(1px);

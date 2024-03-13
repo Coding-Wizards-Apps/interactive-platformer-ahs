@@ -1,8 +1,9 @@
 let video;
 let canvas;
 let ctx;
-let newWidth = 640/4;
-let newHeight = 480/4;
+const factor = 30;
+let newWidth = 640/factor;
+let newHeight = 480/factor;
 function setup() {
   canvas = createCanvas(newWidth, newHeight);
   video = createCapture(VIDEO);
