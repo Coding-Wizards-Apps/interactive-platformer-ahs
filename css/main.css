@@ -1,0 +1,32 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden
+}
+
+main {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    margin: 0 auto !important;
+    filter: blur(1px);
+    animation: animate 0.4s linear infinite alternate;
+}
+
+@keyframes animate {
+    0% {
+        filter: blur(1px);
+    }
+    100% {
+        filter: blur(5px) contrast(7.5);
+    }
+}
+

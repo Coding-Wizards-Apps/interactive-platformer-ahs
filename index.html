@@ -1,12 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="./css/main.css">
 </head>
+
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-   <script src="script.js"></script>
+    <script src="script.js"></script>
+    <script>
+        setTimeout(() => {
+            init();
+        }, 1000);
+
+        const init = () => {
+            const cnv = document.querySelector('canvas');
+            const cnvWidth = cnv.width;
+            const cnvHeight = cnv.height;
+            const wnwWidth = window.innerWidth;
+            const wnwHeight = window.innerHeight;
+
+            // if aspect ratio is wider than window
+            if (cnvWidth / cnvHeight > wnwWidth / wnwHeight) {
+                // upscale to 100%
+                cnv.style.width = wnwWidth + 'px';
+                // keep aspect ratio
+                cnv.style.height = (wnwWidth / cnvWidth * cnvHeight) + 'px';
+            } else {
+                // upscale to 100%
+                cnv.style.height = wnwHeight + 'px';
+                // keep aspect ratio
+                cnv.style.width = (wnwHeight / cnvHeight * cnvWidth) + 'px';
+            }
+        }
+    </script>
 </body>
+
 </html>
