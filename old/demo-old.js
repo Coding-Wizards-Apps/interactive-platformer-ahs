@@ -38,11 +38,14 @@ function draw() {
 
     ctx.putImageData(imgData, 0, 0);
 
-    function euclideanDistance(rgb1, rgb2) {
-        let squareSum = 0;
-        for (let i = 0; i < 3; i++) {
-            squareSum += Math.pow(rgb1[i] - rgb2[i], 2);
-        }
-        return Math.sqrt(squareSum);
-    }
+    
 }
+
+function euclideanDistance(rgb1, rgb2) {
+  let squareSum = 0;
+  for (let i = 0; i < 3; i++) {
+      squareSum += Math.pow(rgb1[i] - rgb2[i], 2);
+  }
+  return Math.sqrt(squareSum);
+}
+

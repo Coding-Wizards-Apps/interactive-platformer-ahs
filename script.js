@@ -1,87 +1,177 @@
 let video;
 let canvas;
 let ctx;
-const factor = 40;
-let newWidth = 640/factor;
-let newHeight = 480/factor;
-const images = []
-let lowerThreshold = 15;
-let upperThreshold = 999999999999;
+const factor = 15;
+let newWidth = 640 / factor;
+let newHeight = 480 / factor;
+const images = [];
+let lowerThreshold = 1 * factor;
+let upperThreshold = 5 * factor;
+const displayVideo = true;
 function setup() {
-  canvas = createCanvas(newWidth, newHeight);
+  canvas = createCanvas(newWidth * factor, newHeight * factor);
   video = createCapture(VIDEO);
   video.size(newWidth, newHeight);
   video.hide();
   // saturation(300)
 }
 
-
-
-function preload(){
-  for (let i = 1; i <= 3; i++) {
-    images[i] = loadImage(`./images/Tileset_0${i}.png`);
+function preload() {
+  for (let i = 1; i <= 11; i++) {
+    if (i < 10) {
+      images[i] = loadImage(`./images/Tileset_0${i}.png`);
+    } else {
+      images[i] = loadImage(`./images/Tileset_${i}.png`);
+    }
   }
 }
 
 function draw() {
-  image(video, 0, 0, newWidth, newHeight);
-  loadPixels();
+  clear()
+  video.loadPixels();
+  let pixels = video.pixels;
+  
+  // loadPixels();
   let clusters = [];
+  // Function to check if two pixels are neighbors
+
   for (let y = 0; y < pixels.length; y++) {
-      let index = (y) * 4;
-      let r = pixels[index];
-      let g = pixels[index + 1];
-      let b = pixels[index + 2];
-      let closestColor = findClosestColor([r, g, b]);
-      
-      pixels[index] = closestColor[0];
-      pixels[index + 1] = closestColor[1];
-      pixels[index + 2] = closestColor[2];
-      let clusterFound = false;
-      let color = [closestColor[0],closestColor[1],closestColor[2]]
-      let coordX = y % newWidth;
-      let coordY = Math.floor(y / newWidth);
-      for (let cluster of clusters) {
-        if (cluster.color[0] === color[0] && cluster.color[1] === color[1] && cluster.color[2] === color[2]) {
-          cluster.pixels.push({coordX, coordY});
-          clusterFound = true;
-          break;
+    let index = y * 4;
+    let r = pixels[index];
+    let g = pixels[index + 1];
+    let b = pixels[index + 2];
+    let closestColor = findClosestColor([r, g, b]);
+
+    pixels[index] = closestColor[0];
+    pixels[index + 1] = closestColor[1];
+    pixels[index + 2] = closestColor[2];
+
+    let color = [closestColor[0], closestColor[1], closestColor[2]];
+    let coordX = y % newWidth;
+    let coordY = Math.floor(y / newWidth);
+
+    let addedToCluster = false;
+    // Check if the color is white or black
+    if (
+      (color[0] === 0 && color[1] === 0 && color[2] === 0) ||
+      (color[0] === 255 && color[1] === 255 && color[2] === 255)
+    ) {
+      continue;
+    }
+    // Check if the pixel can be added to an existing cluster
+    for (let cluster of clusters) {
+      if (
+        cluster.color[0] === color[0] &&
+        cluster.color[1] === color[1] &&
+        cluster.color[2] === color[2]
+      ) {
+        // Check if the pixel is a neighbor of any pixel in the cluster
+        for (let pixel of cluster.pixels) {
+          if (areNeighbors(pixel, { coordX, coordY })) {
+            cluster.pixels.push({ coordX, coordY });
+            addedToCluster = true;
+            break;
+          }
         }
-      }
-      if (!clusterFound) {
-        clusters.push({color, pixels: [{coordX, coordY}]});
+        if (addedToCluster) break;
       }
     }
-  updatePixels();
 
-  
+    // If the pixel couldn't be added to any existing cluster, create a new cluster
+    if (!addedToCluster) {
+      clusters.push({ color, pixels: [{ coordX, coordY }] });
+    }
+
+
+  }
+  if(displayVideo){
+    image(video, 0, 0, width, width * video.height / video.width);
+    for (let i = 0; i < pixels.length; i += 4) {
+      let r = pixels[i];
+      let g = pixels[i + 1];
+      let b = pixels[i + 2];
+      let a = pixels[i + 3];
+      let x = (i / 4) % newWidth ;
+      let y = Math.floor((i / 4) / newWidth);
+      fill(r, g, b, 150);
+      noStroke()
+      rect(x * factor, y * factor , factor, factor);
+    }
+  }
+  // draw pixels on the screen
+  // updatePixels();
+
   console.log(clusters);
   for (let cluster of clusters) {
-    let x = cluster.pixels[0].coordX;
-    let y = cluster.pixels[0].coordY;
-    let width = cluster.pixels.reduce((max, p) => Math.max(max, p.x), x) - x;
-    let height = cluster.pixels.reduce((max, p) => Math.max(max, p.y), y) - y;
-    console.log(cluster.pixels[0].coordX, max)
-    fill(cluster.color[0], cluster.color[1], cluster.color[2],50);
-    
-    if (width > lowerThreshold && height > lowerThreshold && width < upperThreshold && height < upperThreshold) {
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    cluster.pixels.forEach((point) => {
+      minX = Math.min(minX, point.coordX);
+      minY = Math.min(minY, point.coordY);
+      maxX = Math.max(maxX, point.coordX);
+      maxY = Math.max(maxY, point.coordY);
+    });
+
+    const width = maxX - minX + 1;
+    const height = maxY - minY + 1;
+
+    fill(cluster.color[0], cluster.color[1], cluster.color[2], 50);
+    if (
+      // width > lowerThreshold &&
+      // height > lowerThreshold &&
+      // width < upperThreshold &&
+      // height < upperThreshold
+      cluster.pixels.length > lowerThreshold
+      && cluster.pixels.length < upperThreshold
+    ) {
+      cluster.shape = categorizeShape(cluster);
+      let x = cluster.pixels[0].coordX;
+      let y = cluster.pixels[0].coordY;
       let img;
-      if (width < 100) {
+      // if (width < 15) {
+      //   img = images[1];
+      //   fill(255,0,0,100);
+
+      // } else if (width < 20) {
+      //   img = images[2];
+      //   fill(0,255,0,100);
+      // } else {
+      //   img = images[3];
+      //   fill(0,0,255,100);
+      // }
+
+      if (cluster.shape === "I-shaped") {
         img = images[1];
-          console.log("Tileset1")
-      } else if (width < 200) {
+        fill(255, 0, 0, 100);
+      } else if (cluster.shape === "J-shaped") {
         img = images[2];
-      } else {
+        fill(0, 255, 0, 100);
+      } else if (cluster.shape === "L-shaped") {
         img = images[3];
+        fill(0, 0, 255, 100);
+      } else if (cluster.shape === "H-shaped") {
+        img = images[4];
+        fill(255, 255, 0, 100);
+      } else if (cluster.shape === "Rectangle-shaped") {
+        img = images[5];
+        fill(255, 0, 255, 100);
+      } else if (cluster.shape === "_-shaped") {
+        img = images[6];
+        fill(0, 255, 255, 100);
+      } else {
+        img = images[7];
+        fill(255, 255, 255, 100);
       }
-      // image(img, x, y, width, height);
-      noFill(); 
-      stroke(255, 0, 0);
-      strokeWeight(1)
-      rect(x, y, width, height);
-    } else {
-      // rect(x, y, width, height);
-    }
+      // rect(x * factor, y * factor, width * factor, height * factor);
+      tint(255, 100)
+      image(img, x * factor, y * factor, width * factor, height * factor);
+      tint(255, 255)
+      // image(img, x , y  , width * scale , height * scale);
+    } 
   }
 }
 
@@ -107,10 +197,44 @@ let colorPalette = [
   [255, 0, 0], // red
   [0, 0, 255], // blue
   [0, 255, 0], // green
-  [255, 255, 0], // yellow
-  [128, 0, 128], // purple
-  [255, 165, 0], // orange
+  // [255, 255, 0], // yellow
+  // [128, 0, 128], // purple
+  // [255, 165, 0], // orange
   [255, 255, 255], // white
-  [255, 192, 203], // pink
-  [0, 255, 255], // cyan
+  // [255, 192, 203], // pink
+  // [0, 255, 255], // cyan
 ];
+
+function areNeighbors(pixelA, pixelB) {
+  const dx = Math.abs(pixelA.coordX - pixelB.coordX);
+  const dy = Math.abs(pixelA.coordY - pixelB.coordY);
+  return dx <= 1 && dy <= 1;
+}
+
+
+function categorizeShape(cluster) {
+  const pixels = cluster.pixels;
+  const minX = Math.min(...pixels.map(p => p.coordX));
+  const minY = Math.min(...pixels.map(p => p.coordY));
+  const maxX = Math.max(...pixels.map(p => p.coordX));
+  const maxY = Math.max(...pixels.map(p => p.coordY));
+
+  const width = maxX - minX + 1;
+  const height = maxY - minY + 1;
+
+  if (width === 1 && height === 4) {
+      return "I-shaped";
+  } else if (width === 2 && height === 3) {
+      return "J-shaped";
+  } else if (width === 2 && height === 3 && pixels.find(p => p.coordX === minX + 1 && p.coordY === minY)) {
+      return "L-shaped";
+  } else if (width === 3 && height === 2) {
+      return "H-shaped";
+  } else if (width >= 2 && height >= 2 && width === height) {
+      return "Rectangle-shaped";
+  } else if (width >= 2 && height === 1) {
+      return "_-shaped";
+  } else {
+      return "Unknown";
+  }
+}
