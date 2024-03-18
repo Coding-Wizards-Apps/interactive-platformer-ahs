@@ -2,11 +2,13 @@ let video;
 let canvas;
 let ctx;
 const factor = 15;
-let newWidth = 640 / factor;
-let newHeight = 480 / factor;
+let originalPixelW = 640 * 2;
+let originalPixelH = 480 * 2;
+let newWidth = originalPixelW / factor;
+let newHeight = originalPixelH / factor;
 const images = [];
-let lowerThreshold = 1 * factor;
-let upperThreshold = 5 * factor;
+let lowerThreshold = 2 * factor;
+let upperThreshold = 10 * factor;
 const displayVideo = true;
 function setup() {
   canvas = createCanvas(newWidth * factor, newHeight * factor);
@@ -91,9 +93,11 @@ function draw() {
       let g = pixels[i + 1];
       let b = pixels[i + 2];
       let a = pixels[i + 3];
-      let x = (i / 4) % newWidth ;
-      let y = Math.floor((i / 4) / newWidth);
-      fill(r, g, b, 150);
+      // let x = (i / 4) % newWidth ;
+      // let y = Math.floor((i / 4) / newWidth);
+      let x = (i / 4) % video.width;
+      let y = Math.floor((i / 4) / video.width);
+      fill(r, g, b, 40);
       noStroke()
       rect(x * factor, y * factor , factor, factor);
     }
