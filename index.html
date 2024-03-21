@@ -8,12 +8,44 @@
     <link rel="stylesheet" href="./css/main.css">
    
 <body>
+
+
+    
+    <div id="overlay" class="overlay">
+        <div class="instructions">
+        <h2>Instructions</h2>
+        <p>Point your webcam at clustered colors to generate platforms for the platform game.</p>
+        <button id="closeButton" class="closeButton">Close</button>
+    </div>  </div>
     <div class="playbutton" id="playButton">
         PLAY
     </div>
     <div id="canvasPlay"></div>
     <div id="highscore" class="highscore"></div>
     <!-- <script src="./game.js"></script> -->
+    <script>
+        // Wait for the DOM to load
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get the overlay and close button elements
+            const overlay = document.getElementById("overlay");
+            const closeButton = document.getElementById("closeButton");
+
+            // Hide the overlay by default
+            overlay.style.display = "none";
+
+            // Add click event listener to the close button
+            closeButton.addEventListener("click", function() {
+                // Hide the overlay when the close button is clicked
+                overlay.style.display = "none";
+
+                // Start the scripts here
+                // Add your script code here
+            });
+
+            // Show the overlay initially
+            overlay.style.display = "block";
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://p5play.org/v3/planck.min.js"></script>
     <script src="https://p5play.org/v3/p5play.js"></script></head>

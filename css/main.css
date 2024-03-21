@@ -53,3 +53,40 @@ canvas {
   color: white;
   font-size: 30px;
 }
+
+.overlay {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  
+}
+
+.instructions {
+  text-align: center;
+  color: white;
+  font-size: 24px;
+  display: flex;  
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  flex-flow: column;
+}
+
+.closeButton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+  background-color: #f1f1f1;
+  text-decoration: none;
+  transition: 0.3s;
+}
