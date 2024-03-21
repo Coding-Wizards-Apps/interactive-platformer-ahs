@@ -36,7 +36,7 @@ const Game = (() => {
   function preload() {
     sky = loadImage("assets/sky.png");
     ground = loadImage("assets/platform.png");
-    dude = loadImage("assets/1x/standing.png");
+    dude = loadImage("assets/dude.png");
     doorImg = loadImage("assets/door.png");
   }
 
@@ -51,7 +51,7 @@ const Game = (() => {
     floor.w = config.width;
     floor.h = 5;
     floor.collider = "static";
-    player = new Sprite(50, 50, 40, 350);
+    player = new Sprite(50, 50, 40, 450);
     player.scale = 0.25;
     player.img = dude;
     player.bounciness = 0.5;
