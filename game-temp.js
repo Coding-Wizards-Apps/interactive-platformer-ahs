@@ -98,7 +98,7 @@ let config = {
   
   function shootBullet() {
     // Create a bullet at the player's position
-    let bullet = createSprite(player.position.x, player.position.y - 10);
+    let bullet = createSprite(this.player.position.x, this.player.position.y - 10);
     bullet.setSpeed(10, 90);
     bullet.life = 50;
     bullets.push(bullet);

@@ -13,6 +13,11 @@ let playerDirection = 1;
 let door;
 let startTime = Date.now();
 const playerSpeed = 2.5;
+let sky;
+let ground;
+let dude;
+let doorImg;
+let platform
 function preload() {
   // Load assets like images and spritesheets
   sky = loadImage('assets/sky.png');
@@ -176,3 +181,7 @@ function shootBullet() {
   bullet.life = 50;
   bullets.push(bullet);
 }
+
+window.preload = preload;
+window.setup = setup;
+window.draw = draw;
