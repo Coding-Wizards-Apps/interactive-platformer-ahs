@@ -28,13 +28,14 @@ async function setup() {
   floor.h = 5;
   floor.collider = 'static';
   player = new Sprite(50, 50, 50, 50, 2.5);
-  player.scale = 1.5;
+  player.scale = 1;
   player.img = dude;
-
+  player.bounciness = 0.5;
+  // player.collider = 'dynamic';
+  player.rotationLock = true;
   image(sky, 0, 0, config.width, config.height);
 
   platforms = new Group();
-
   platforms.img = ground;
   platforms.collider = 'static';
 
@@ -45,7 +46,7 @@ async function setup() {
   //   platforms.add(platform);
   // }
 
-  for (let x = 0; x < config.width * 2; x += 70) {
+  for (let x = 0; x < config.width * 3; x += 70) {
     platform = new platforms.Sprite();
     platform.x = x;
     platform.y = random(0, config.height);
@@ -75,18 +76,19 @@ function draw() {
     player.velocity.x = playerDirection * playerSpeed;
   } else {
     player.velocity.x = 0;
+    player.rotationddw = 0;
   }
 
-  if ((keyIsDown(UP_ARROW) || keyIsDown(87)) && player.collide(platforms)) {
+  if ((keyIsDown(UP_ARROW) || keyIsDown(87)) && (player.collide(platforms) || player.collide(floor))) {
     // UP_ARROW or 'W' key
-    player.velocity.y = -3;
+    player.velocity.y = -7;
   }
 
   // Additional check to prevent continuous jumping
   if (!keyIsDown(UP_ARROW) && !keyIsDown(87) && player.velocity.y < 0) {
     // UP_ARROW or 'W' key
     // Apply a higher force upwards to make the jump higher
-    player.velocity.y = 40;
+    player.velocity.y += 1;
   }
 
   // Check for collision between bullets and enemies
