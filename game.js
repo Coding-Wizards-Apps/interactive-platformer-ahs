@@ -10,25 +10,28 @@ let enemies = [];
 let bullets = [];
 let cursors;
 let playerDirection = 1;
+let door;
+let startTime = Date.now();
 const playerSpeed = 2.5;
 function preload() {
   // Load assets like images and spritesheets
   sky = loadImage('assets/sky.png');
   ground = loadImage('assets/platform.png');
-  dude = loadImage('assets/dude.png');
+  dude = loadImage('assets/1x/standing.png');
+  doorImg = loadImage('assets/door.png');
 }
 
 async function setup() {
   createCanvas(config.width, config.height);
-  world.gravity.y = 5;
+  world.gravity.y = 10;
 
   floor = new Sprite();
   floor.y = config.height - 5;
   floor.w = config.width;
   floor.h = 5;
   floor.collider = 'static';
-  player = new Sprite(50, 50, 50, 50, 2.5);
-  player.scale = 1;
+  player = new Sprite(50, 50, 40, 350);
+  player.scale = .25;
   player.img = dude;
   player.bounciness = 0.5;
   // player.collider = 'dynamic';
@@ -58,9 +61,10 @@ async function setup() {
     enemies.push(enemy);
   }
 
-  let door = createSprite(config.width / 2, 0);
-  door.addImage(doorImg);
-  door.setCollider("rectangle", 0, 0, door.width, door.height);
+  door = createSprite(config.width / 2, 0);
+  door.img = doorImg;
+  door.collider = 'static';
+  door.scale.x = 4.5;
 }
 
 function draw() {
@@ -70,18 +74,19 @@ function draw() {
     // LEFT_ARROW or 'A' key
     playerDirection = -1;
     player.velocity.x = playerDirection * playerSpeed;
+    player.scale.x = -0.25;
   } else if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
     // RIGHT_ARROW or 'D' key
     playerDirection = 1;
     player.velocity.x = playerDirection * playerSpeed;
+    player.scale.x = 0.25;
   } else {
     player.velocity.x = 0;
-    player.rotationddw = 0;
   }
 
   if ((keyIsDown(UP_ARROW) || keyIsDown(87)) && (player.collide(platforms) || player.collide(floor))) {
     // UP_ARROW or 'W' key
-    player.velocity.y = -7;
+    player.velocity.y = -11;
   }
 
   // Additional check to prevent continuous jumping
@@ -124,6 +129,18 @@ function draw() {
       enemy.velocity.x = enemy.directionX * enemy.speed;
     }
   }
+
+  // Check for collision between player and door
+  if (player.collide(door)) {
+    // Stop the game
+    noLoop();
+
+    // Calculate highscore based on seconds used to reach the top
+    let endTime = Date.now();
+    let highscore = Math.floor((endTime - startTime) / 1000); // startTime should be defined when the game starts
+
+    console.log(`Highscore: ${highscore} seconds`);
+  }
   camera.y = player.y;
   // end of draw
 }
@@ -153,7 +170,7 @@ function keyPressed() {
 
 function shootBullet() {
   // Create a bullet at the player's position
-  let bullet = createSprite(player.position.x, player.position.y - 10);
+  let bullet = createSprite(player.position.x + playerDirection * 10, player.position.y - 10);
   // bullet.setSpeed(1000, 1000);
   bullet.velocity.x = playerDirection * 50;
   bullet.life = 50;
