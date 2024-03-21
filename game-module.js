@@ -1,7 +1,7 @@
 const Game = (() => {
   let config = {
     width: 1200,
-    height: 1000,
+    height: 1800,
   };
 
   // Variables related to player
@@ -68,11 +68,6 @@ const Game = (() => {
     bullets = new Group();
     bullets.img = bulletImg;
     bullets.scale = 0.1;
-    // for (let i = 0; i < 5; i++) {
-    //   let randomX = Math.random() * config.width;
-    //   let randomY = Math.random() * config.height;
-    //   createEnemy(randomX, randomY, i);
-    // }
     for (let i = 0; i < enemies.length; i++) {
       for (let j = i + 1; j < enemies.length; j++) {
         if (enemies[i].overlap(enemies[j])) {
@@ -80,6 +75,10 @@ const Game = (() => {
         }
       }
     }
+    document.querySelector('#defaultCanvas0').style.width = `${config.width}px`;
+    document.querySelector('#defaultCanvas0').style.height = `${config.height}px`;
+    document.querySelector('#defaultCanvas0').style.setProperty('width', `${config.width}px`, 'important');
+    document.querySelector('#defaultCanvas0').style.setProperty('height', `${config.height}px`, 'important');
   }
 
   function draw() {
@@ -175,7 +174,7 @@ const Game = (() => {
   function resetGame() {
     // Reset player position
     player.position.x = config.width / 2;
-    player.position.y = config.height / 2;
+    player.position.y = config.height -50;
 
     // Reset enemy positions
     for (let i = 0; i < enemies.length; i++) {
@@ -241,6 +240,7 @@ const Game = (() => {
     player.img = playerImg;
     player.bounciness = 2;
     player.rotationLock = false;
+    player.y = config.height - 50;
   }
 
   function createPlatforms(clusters) {
@@ -254,6 +254,7 @@ const Game = (() => {
       }
     } else {
       for (let cluster of clusters) {
+        console.log(cluster)
         createPlatform(
           (cluster.pixels[0].coordX * config.width) / 100,
           (cluster.pixels[0].coordY * config.height) / 100,
@@ -265,7 +266,8 @@ const Game = (() => {
   }
 
   function createPlatform(x, y, w,h) {
-    let platform = new platforms.Sprite(x,y, w, h);
+    let platform = new platforms.Sprite(x,y);
+    platform.scale.x = w;
 
     if (Math.random() > 0.5) {
       createEnemy(x, y);

@@ -122,6 +122,8 @@ const WebcamModule = (() => {
 
       const width = maxX - minX + 1;
       const height = maxY - minY + 1;
+      cluster.width = width;
+      cluster.height = height;
 
       fill(cluster.color[0], cluster.color[1], cluster.color[2], 50);
 
