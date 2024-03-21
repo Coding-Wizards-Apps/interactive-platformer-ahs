@@ -17,9 +17,10 @@ const Game = (() => {
   let ground = null;
   let dude = null;
   let doorImg = null;
+  let bulletImg = null;
   let highScore = 0;
   let scoreText = null;
-
+let bulletInstances = [];
   function updateHighScore() {
     let currentTime = Math.floor((Date.now() - startTime) / 1000);
     if (currentTime > highScore) {
@@ -38,6 +39,7 @@ const Game = (() => {
     ground = loadImage("assets/platform.png");
     dude = loadImage("assets/dude.png");
     doorImg = loadImage("assets/door.png");
+    bulletImg = loadImage("assets/dentures.png");
   }
 
 
@@ -62,6 +64,10 @@ const Game = (() => {
     platforms = new Group();
     platforms.img = ground;
     platforms.collider = "static";
+
+    bullets = new Group();
+    bullets.img = bulletImg;
+    bullets.scale = 0.01;
 
     if(!clusters){
 
@@ -125,10 +131,10 @@ const Game = (() => {
     }
 
     // Check for collision betweenbullets and enemies
-    for (let i = bullets.length - 1; i >= 0; i--) {
+    for (let i = bulletInstances.length - 1; i >= 0; i--) {
       for (let j = enemies.length - 1; j >= 0; j--) {
-        if (bullets[i].overlap(enemies[j])) {
-          bullets[i].remove();
+        if (bulletInstances[i].overlap(enemies[j])) {
+          bulletInstances[i].remove();
           enemies[j].remove();
         }
       }
@@ -187,8 +193,8 @@ const Game = (() => {
     }
 
     // Remove allbullets
-    for (let i = bullets.length - 1; i >= 0; i--) {
-      bullets[i].remove();
+    for (let i = bulletInstances.length - 1; i >= 0; i--) {
+      bulletInstances[i].remove();
     }
   }
 
@@ -196,14 +202,17 @@ const Game = (() => {
 
   function shootBullet() {
     // Create a bullet at the player's position
-    let bullet = createSprite(
-      player.position.x + playerDirection * 10,
-      player.position.y - 10
-    );
+    let bullet = new bullets.Sprite(player.position.x + playerDirection * 10, player.position.y -10 );
+    // let bullet = createSprite(
+    //   player.position.x + playerDirection * 10,
+    //   player.position.y - 10
+    // );
     // bullet.setSpeed(1000, 1000);
+    bullet.scale*= -playerDirection
+
     bullet.velocity.x = playerDirection * 50;
     bullet.life = 50;
-    bullets.push(bullet);
+    bulletInstances.push(bullet);
   }
 
   return {
