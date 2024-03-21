@@ -7,7 +7,7 @@ const WebcamModule = (() => {
   let newWidth = originalPixelW / factor;
   let newHeight = originalPixelH / factor;
   const images = [];
-  let lowerThreshold = 1 * factor;
+  let lowerThreshold = .5 * factor;
   let upperThreshold = 10 * factor;
   const displayVideo = true;
   let clusters = [];
@@ -20,11 +20,11 @@ const WebcamModule = (() => {
   }
 
   function preload() {
-    for (let i = 1; i <= 11; i++) {
+    for (let i = 1; i <= 6; i++) {
       if (i < 10) {
-        images[i] = loadImage(`./images/Tileset_0${i}.png`);
+        images[i] = loadImage(`./assets/tiles/Asset ${i}.png`);
       } else {
-        images[i] = loadImage(`./images/Tileset_${i}.png`);
+        images[i] = loadImage(`./assets/tiles/Tileset_${i}.png`);
       }
     }
   }
@@ -132,27 +132,21 @@ const WebcamModule = (() => {
 
       if (cluster.shape === "I-shaped") {
         img = images[1];
-        fill(255, 0, 0, 100);
       } else if (cluster.shape === "J-shaped") {
         img = images[2];
-        fill(0, 255, 0, 100);
       } else if (cluster.shape === "L-shaped") {
         img = images[3];
-        fill(0, 0, 255, 100);
       } else if (cluster.shape === "H-shaped") {
         img = images[4];
-        fill(255, 255, 0, 100);
       } else if (cluster.shape === "Rectangle-shaped") {
         img = images[5];
-        fill(255, 0, 255, 100);
       } else if (cluster.shape === "_-shaped") {
         img = images[6];
-        fill(0, 255, 255, 100);
       } else {
-        img = images[7];
-        fill(255, 255, 255, 100);
+        img = images[5];
       }
-      tint(255, 100);
+      // fill(cluster.color[0], cluster.color[1], cluster.color[2], 100);
+      tint(255, 255);
       image(img, x * factor, y * factor, width * factor, height * factor);
       tint(255, 255);
     }

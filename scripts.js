@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Add your play button logic here
       console.log("Play button clicked");
       playButton.style.display = "none";
+      
       WebcamModule.stopWebcam();  
       Game.setup(WebcamModule.getClusters());
       gameStarted = true;

@@ -43,3 +43,13 @@ canvas {
     transition: 0.3s;
 }
 
+.highscore{
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  color: white;
+  font-size: 30px;
+}
