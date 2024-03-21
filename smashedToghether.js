@@ -2,9 +2,8 @@ import Game from "./game-module.js";
 
 import WebcamModule from "./webcam-module.js";
 let gameStarted = false;
-let game = new Game();
 function preload() {
-  game.preload();
+  Game.preload();
   WebcamModule.preload();
 }
 
@@ -14,14 +13,14 @@ function setup() {
 
 function draw() {
   if (gameStarted) {
-    game.draw();
+    Game.draw();
   } else {
     WebcamModule.draw();
   }
 }
 function keyPressed() {
   if (keyCode === 32) {
-    game.shootBullet();
+    Game.shootBullet();
   }
 }
 
@@ -33,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("Play button clicked");
       playButton.style.display = "none";
       WebcamModule.stopWebcam();  
-      game.setup(WebcamModule.getClusters());
+      Game.setup(WebcamModule.getClusters());
       gameStarted = true;
     });
   } else {
