@@ -1,6 +1,7 @@
 const Game = (() => {
   let config = {
-    width: 1200,
+    width: window.innerWidth,
+
     height: 1800,
   };
 
@@ -9,6 +10,7 @@ const Game = (() => {
   let playerDirection = 1;
   let playerSpeed = 2.5;
   let playerImg = null;
+  let playerJumpVelocity = -15;
 
   // Variables related to door
   let door = null;
@@ -33,6 +35,8 @@ const Game = (() => {
   let enemyImg = null;
   let bulletImg = null;
 
+  let clusterList = null;
+
   function updateHighScore() {
     let currentTime = Math.floor((Date.now() - startTime) / 1000);
     if (currentTime > highScore) {
@@ -56,6 +60,7 @@ const Game = (() => {
   }
 
   function setup(clusters) {
+    clusterList = clusters;
     startTime = Date.now();
     createCanvas(config.width, config.height);
     setupWorld();
@@ -76,9 +81,15 @@ const Game = (() => {
       }
     }
     document.querySelector('#defaultCanvas0').style.width = `${config.width}px`;
-    document.querySelector('#defaultCanvas0').style.height = `${config.height}px`;
-    document.querySelector('#defaultCanvas0').style.setProperty('width', `${config.width}px`, 'important');
-    document.querySelector('#defaultCanvas0').style.setProperty('height', `${config.height}px`, 'important');
+    document.querySelector(
+      '#defaultCanvas0'
+    ).style.height = `${config.height}px`;
+    document
+      .querySelector('#defaultCanvas0')
+      .style.setProperty('width', `${config.width}px`, 'important');
+    document
+      .querySelector('#defaultCanvas0')
+      .style.setProperty('height', `${config.height}px`, 'important');
   }
 
   function draw() {
@@ -91,6 +102,11 @@ const Game = (() => {
     updateHighScore();
     displayHighScore();
     adjustCameraPosition();
+    console.log(player.velocity);
+
+    if (player.velocity.y > 20) {
+      player.velocity.y = 0;
+    }
   }
 
   function handlePlayerMovement() {
@@ -106,7 +122,7 @@ const Game = (() => {
       (keyIsDown(UP_ARROW) || keyIsDown(87)) &&
       (player.collide(platforms) || player.collide(floor))
     ) {
-      player.velocity.y = -11;
+      player.velocity.y = playerJumpVelocity;
     }
 
     if (!keyIsDown(UP_ARROW) && !keyIsDown(87) && player.velocity.y < 0) {
@@ -140,18 +156,62 @@ const Game = (() => {
     }
   }
 
+  // function updateEnemyMovement() {
+  //   for (let i = 0; i < enemies.length; i++) {
+  //     let enemy = enemies[i];
+  //     if (!enemy.framesRemaining) {
+  //       enemy.framesRemaining = Math.floor(Math.random() * 10) + 50;
+  //       enemy.directionX = Math.random() < 0.5 ? -1 : 1;
+  //       enemy.speed = 1; // Adjust the speed as needed
+  //     }
+  //     enemy.framesRemaining--;
+
+  //     if (enemy.framesRemaining % 10 === 0) {
+  //       enemy.velocity.x = enemy.directionX * enemy.speed;
+  //     }
+  //   }
+  // }
   function updateEnemyMovement() {
     for (let i = 0; i < enemies.length; i++) {
       let enemy = enemies[i];
       if (!enemy.framesRemaining) {
-        enemy.framesRemaining = Math.floor(Math.random() * 10) + 50;
-        enemy.directionX = Math.random() < 0.5 ? -1 : 1;
-        enemy.speed = 1; // Adjust the speed as needed
+        console.log('enemy', enemy);
+        enemy.framesRemaining = Math.floor(Math.random() * 10) + 150;
+
+        let platformUnderneath = platforms.find(
+          (p) =>
+            p.position.y > enemy.position.y &&
+            p.position.y - enemy.position.y < 60
+        );
+        if (platformUnderneath) {
+          enemy.directionX = Math.random() < 0.5 ? -0.5 : 0.5;
+          enemy.speed = 0; // Starting speed is 0
+          enemy.acceleration = 0.02; // Adjust the acceleration as needed
+          enemy.maxSpeed = 1.5; // Adjust the maximum speed as needed
+          enemy.jumpProbability = 0.01; // Adjust the jump probability as needed
+        } else {
+          enemy.directionX = 0.1;
+        }
       }
       enemy.framesRemaining--;
 
-      if (enemy.framesRemaining % 10 === 0) {
-        enemy.velocity.x = enemy.directionX * enemy.speed;
+      // Apply acceleration
+      if (enemy.speed < enemy.maxSpeed) {
+        enemy.speed += enemy.acceleration;
+      }
+
+      // Apply velocity
+      enemy.velocity.x = enemy.directionX * enemy.speed;
+
+      // Simulate friction or air resistance
+      enemy.velocity.x *= 0.99; // Adjust the friction factor as needed
+
+      // Jump randomly if touching the floor or platforms
+      if (
+        Math.random() < enemy.jumpProbability &&
+        (enemy.collide(platforms) || enemy.collide(floor))
+      ) {
+        enemy.velocity.y = -10; // Adjust the jump velocity as needed
       }
     }
   }
@@ -174,12 +234,14 @@ const Game = (() => {
   function resetGame() {
     // Reset player position
     player.position.x = config.width / 2;
-    player.position.y = config.height -50;
+    player.position.y = config.height - 50;
 
     // Reset enemy positions
     for (let i = 0; i < enemies.length; i++) {
-      enemies[i].position.x = 12 + i * 140;
-      enemies[i].position.y = 0;
+      let cluster = clusterList[Math.floor(Math.random() * clusterList.length)];
+      enemies[i].position.x = (cluster.pixels[0].coordX * config.width) / 100;
+      enemies[i].position.y =
+        (cluster.pixels[0].coordY * config.height) / 100 - 20;
     }
 
     // Remove allbullets
@@ -254,7 +316,7 @@ const Game = (() => {
       }
     } else {
       for (let cluster of clusters) {
-        console.log(cluster)
+        console.log(cluster);
         createPlatform(
           (cluster.pixels[0].coordX * config.width) / 100,
           (cluster.pixels[0].coordY * config.height) / 100,
@@ -265,8 +327,8 @@ const Game = (() => {
     }
   }
 
-  function createPlatform(x, y, w,h) {
-    let platform = new platforms.Sprite(x,y);
+  function createPlatform(x, y, w, h) {
+    let platform = new platforms.Sprite(x, y);
     platform.scale.x = w;
 
     if (Math.random() > 0.5) {

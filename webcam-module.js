@@ -7,8 +7,8 @@ const WebcamModule = (() => {
   let newWidth = originalPixelW / factor;
   let newHeight = originalPixelH / factor;
   const images = [];
-  let lowerThreshold = .5 * factor;
-  let upperThreshold = 10 * factor;
+  let lowerThreshold = 1 * factor;
+  let upperThreshold = 2 * factor;
   const displayVideo = true;
   let clusters = [];
   function setup() {
@@ -152,7 +152,7 @@ const WebcamModule = (() => {
       image(img, x * factor, y * factor, width * factor, height * factor);
       tint(255, 255);
     }
-
+    
     // Normalize the coordinates of the pixels inside the clusters
     for (let cluster of clusters) {
       cluster.pixels = cluster.pixels.map(pixel => {
@@ -183,7 +183,7 @@ const WebcamModule = (() => {
   }
 
   let colorPalette = [
-    [0, 0, 0], // black
+    // [0, 0, 0], // black
     [255, 0, 0], // red
     [0, 0, 255], // blue
     [0, 255, 0], // green
