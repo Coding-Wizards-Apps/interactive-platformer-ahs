@@ -2,7 +2,7 @@ const Game = (() => {
   let config = {
     width: window.innerWidth,
 
-    height: window.innerHeight,
+    height: window.innerHeight * 1.1,
   };
 
   // Variables related to player
@@ -10,7 +10,7 @@ const Game = (() => {
   let playerDirection = 1;
   let playerSpeed = 2.5;
   let playerImg = null;
-  let playerJumpVelocity = -15;
+  let playerJumpVelocity = -5;
 
   // Variables related to door
   let door = null;
@@ -331,18 +331,15 @@ const Game = (() => {
     let platform = new platforms.Sprite(x, y);
     platform.scale.x = w;
     platform.scale.y = h / (config.height / window.innerHeight);
-    if (Math.random() > 0.5) {
+    if (Math.random() > 0.7) {
       createEnemy(x, y);
     }
   }
 
   function createEnemy(x, y) {
-    let enemy = createSprite(x, y + 20);
+    let enemy = createSprite(x, y - 100);
     enemy.img = enemyImg;
-    enemy.scale = 0.25;
-    // enemy.position.x = x;
-    // enemy.position.y = y+20;
-    // enemy.velocity.y = random(0.4, 0.8);
+    enemy.scale = 0.15;
     enemy.rotationLock = true;
     enemy.bounciness = 1;
     enemies.push(enemy);
