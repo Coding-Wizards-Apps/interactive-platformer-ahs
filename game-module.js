@@ -2,7 +2,7 @@ const Game = (() => {
   let config = {
     width: window.innerWidth,
 
-    height: 1800,
+    height: window.innerHeight,
   };
 
   // Variables related to player
@@ -318,8 +318,8 @@ const Game = (() => {
       for (let cluster of clusters) {
         console.log(cluster);
         createPlatform(
-          (cluster.pixels[0].coordX * config.width) / 100,
-          (cluster.pixels[0].coordY * config.height) / 100,
+          (cluster.normalizedMinX * config.width) / 100,
+          (cluster.normalizedMinY * config.height) / 100 - 100,
           cluster.width,
           cluster.height
         );
@@ -330,7 +330,7 @@ const Game = (() => {
   function createPlatform(x, y, w, h) {
     let platform = new platforms.Sprite(x, y);
     platform.scale.x = w;
-
+    platform.scale.y = h / (config.height / window.innerHeight);
     if (Math.random() > 0.5) {
       createEnemy(x, y);
     }

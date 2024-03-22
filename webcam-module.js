@@ -1,14 +1,14 @@
 const WebcamModule = (() => {
   let video;
   let canvas;
-  const scaleDownFactor = 15;
+  const scaleDownFactor = 20;
   let originalPixelW = 640 * 2;
   let originalPixelH = 480 * 2;
   let newWidth = originalPixelW / scaleDownFactor;
   let newHeight = originalPixelH / scaleDownFactor;
   const images = [];
-  let lowerThreshold = 1 * scaleDownFactor;
-  let upperThreshold = 10 * scaleDownFactor;
+  let lowerThreshold = .1 * scaleDownFactor;
+  let upperThreshold = 3 * scaleDownFactor;
   const displayVideo = true;
   let clusters = [];
   let grabVideo = true;
@@ -47,6 +47,10 @@ const WebcamModule = (() => {
     }
     
     filterClusters();
+    // update clusters
+    clusters = clusters.map(cluster => {
+      return addCustomProperties(cluster);
+    });
     drawClusterShapes();
     
     normalizeClusterCoordinates();
@@ -59,7 +63,7 @@ const WebcamModule = (() => {
       let g = pixels[index + 1];
       let b = pixels[index + 2];
       let closestColor = findClosestColor([r, g, b]);
-  
+      
       pixels[index] = closestColor[0];
       pixels[index + 1] = closestColor[1];
       pixels[index + 2] = closestColor[2];
@@ -69,7 +73,8 @@ const WebcamModule = (() => {
       let coordY = Math.round(y / newWidth);
       let addedToCluster = false;
       
-      if (colorIsBlackOrWhite(color)) {
+      // added euclidian distance to filter out colors that are too far from the palette
+      if (colorIsBlackOrWhite(color) || euclideanDistance(color, [r, g, b]) > 200){
         continue;
       }
   
@@ -141,9 +146,7 @@ const WebcamModule = (() => {
     for (let cluster of clusters) {
       fill(cluster.color[0], cluster.color[1], cluster.color[2], 50);
   
-      cluster = addCustomProperties(cluster);
       let img;
-  
       if (cluster.shape === "I-shaped") {
         img = images[1];
       } else if (cluster.shape === "J-shaped") {
@@ -221,6 +224,11 @@ const WebcamModule = (() => {
     const minY = Math.min(...pixels.map((p) => p.coordY));
     const maxX = Math.max(...pixels.map((p) => p.coordX));
     const maxY = Math.max(...pixels.map((p) => p.coordY));
+    
+    const normalizedMinX = (minX / newWidth) * 100;
+    const normalizedMinY = (minY / newHeight) * 100;
+    const normalizedMaxX = (maxX / newWidth) * 100;
+    const normalizedMaxY = (maxY / newHeight) * 100;
 
     const width = maxX - minX + 1;
     const height = maxY - minY + 1;
@@ -247,12 +255,13 @@ const WebcamModule = (() => {
       cluster.shape = "Unknown";
     }
 
-    cluster = { ...cluster, minX, minY, maxX, maxY, width, height}
+    cluster = { ...cluster, minX, minY, maxX, maxY, normalizedMinX, normalizedMinY, width, height}
 
     return cluster;
   }
 
   function getClusters() {
+
     return clusters;
   }
 
