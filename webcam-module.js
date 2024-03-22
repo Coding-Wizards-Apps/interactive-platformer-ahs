@@ -1,19 +1,24 @@
 const WebcamModule = (() => {
   let video;
   let canvas;
-  const factor = 15;
+  const scaleDownFactor = 15;
   let originalPixelW = 640 * 2;
   let originalPixelH = 480 * 2;
-  let newWidth = originalPixelW / factor;
-  let newHeight = originalPixelH / factor;
+  let newWidth = originalPixelW / scaleDownFactor;
+  let newHeight = originalPixelH / scaleDownFactor;
   const images = [];
-  let lowerThreshold = 1 * factor;
-  let upperThreshold = 2 * factor;
+  let lowerThreshold = 1 * scaleDownFactor;
+  let upperThreshold = 10 * scaleDownFactor;
   const displayVideo = true;
   let clusters = [];
-  function setup() {
-    canvas = createCanvas(newWidth * factor, newHeight * factor);
-    video = createCapture(VIDEO);
+  let grabVideo = true;
+  async function setup() {
+    canvas = createCanvas(newWidth * scaleDownFactor, newHeight * scaleDownFactor);
+    if (grabVideo) {
+      video = createCapture(VIDEO);
+    } else {
+      // video =  await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+    }
     video.size(newWidth, newHeight);
     video.hide();
     canvas.parent("canvasPlay"); // Set parent to canvas1
@@ -34,104 +39,111 @@ const WebcamModule = (() => {
     clusters = [];
     video.loadPixels();
     let pixels = video.pixels;
-
-    // loadPixels();
-    // Function to check if two pixels are neighbors
-
+  
+    processPixels(pixels);
+    
+    if (displayVideo) {
+      displayProcessedVideo(pixels);
+    }
+    
+    filterClusters();
+    drawClusterShapes();
+    
+    normalizeClusterCoordinates();
+  }
+  
+  function processPixels(pixels) {
     for (let y = 0; y < pixels.length; y++) {
       let index = y * 4;
       let r = pixels[index];
       let g = pixels[index + 1];
       let b = pixels[index + 2];
       let closestColor = findClosestColor([r, g, b]);
-
+  
       pixels[index] = closestColor[0];
       pixels[index + 1] = closestColor[1];
       pixels[index + 2] = closestColor[2];
-
+  
       let color = [closestColor[0], closestColor[1], closestColor[2]];
-      let coordX = y % newWidth;
-      let coordY = Math.floor(y / newWidth);
-
+      let coordX = (y % newWidth);
+      let coordY = Math.round(y / newWidth);
       let addedToCluster = false;
-      // Check if the color is white or black
-      if (
-        (color[0] === 0 && color[1] === 0 && color[2] === 0) ||
-        (color[0] === 255 && color[1] === 255 && color[2] === 255)
-      ) {
+      
+      if (colorIsBlackOrWhite(color)) {
         continue;
       }
-
-      // Check if the pixel can be added to an existing cluster
-      for (let cluster of clusters) {
-        if (
-          cluster.color[0] === color[0] &&
-          cluster.color[1] === color[1] &&
-          cluster.color[2] === color[2]
-        ) {
-          // Check if the pixel is a neighbor of any pixel in the cluster
-          for (let pixel of cluster.pixels) {
-            if (areNeighbors(pixel, { coordX, coordY })) {
-              cluster.pixels.push({ coordX, coordY });
-              addedToCluster = true;
-              break;
-            }
-          }
-          if (addedToCluster) break;
-        }
-      }
-
-      // If the pixel couldn't be added to any existing cluster, create a new cluster
-      if (!addedToCluster) {
-        clusters.push({ color, pixels: [{ coordX, coordY }] });
+  
+      updateClusters(color, coordX, coordY, addedToCluster);
+    }
+  }
+  
+  function colorIsBlackOrWhite(color) {
+    return (
+      (color[0] === 0 && color[1] === 0 && color[2] === 0) ||
+      (color[0] === 255 && color[1] === 255 && color[2] === 255)
+    );
+  }
+  
+  function updateClusters(color, coordX, coordY, addedToCluster) {
+    for (let cluster of clusters) {
+      if (clusterHasSameColor(cluster, color)) {
+        addedToCluster = addPixelToCluster(cluster, coordX, coordY);
+        if (addedToCluster) break;
       }
     }
-    if (displayVideo) {
-      image(video, 0, 0, width, (width * video.height) / video.width);
-      for (let i = 0; i < pixels.length; i += 4) {
-        let r = pixels[i];
-        let g = pixels[i + 1];
-        let b = pixels[i + 2];
-        let a = pixels[i + 3];
-        // let x = (i / 4) % newWidth ;
-        // let y = Math.floor((i / 4) / newWidth);
-        let x = (i / 4) % video.width;
-        let y = Math.floor(i / 4 / video.width);
-        fill(r, g, b, 40);
-        noStroke();
-        rect(x * factor, y * factor, factor, factor);
+  
+    if (!addedToCluster) {
+      clusters.push({ color, pixels: [{ coordX, coordY }] });
+    }
+  }
+  
+  function clusterHasSameColor(cluster, color) {
+    return (
+      cluster.color[0] === color[0] &&
+      cluster.color[1] === color[1] &&
+      cluster.color[2] === color[2]
+    );
+  }
+  
+  function addPixelToCluster(cluster, coordX, coordY) {
+    for (let pixel of cluster.pixels) {
+      if (areNeighbors(pixel, { coordX, coordY })) {
+        cluster.pixels.push({ coordX, coordY });
+        return true;
       }
     }
-    // draw pixels on the screen
+    return false;
+  }
+  
+  function displayProcessedVideo(pixels) {
+    image(video, 0, 0, width, (width * video.height) / video.width);
+    for (let i = 0; i < pixels.length; i += 4) {
+      let r = pixels[i];
+      let g = pixels[i + 1];
+      let b = pixels[i + 2];
+      let a = pixels[i + 3];
+      let x = (i / 4) % video.width;
+      let y = Math.round(i / 4 / video.width);
+      fill(r, g, b, 40);
+      noStroke();
+      rect(x * scaleDownFactor, y * scaleDownFactor, scaleDownFactor, scaleDownFactor);
+    }
+  }
+  
+  function filterClusters() {
     clusters = clusters.filter(
       ({ pixels }) =>
         pixels.length > lowerThreshold && pixels.length < upperThreshold
     );
+  }
+  
+  function drawClusterShapes() {
     for (let cluster of clusters) {
-      let minX = Infinity;
-      let minY = Infinity;
-      let maxX = -Infinity;
-      let maxY = -Infinity;
-
-      cluster.pixels.forEach((point) => {
-        minX = Math.min(minX, point.coordX);
-        minY = Math.min(minY, point.coordY);
-        maxX = Math.max(maxX, point.coordX);
-        maxY = Math.max(maxY, point.coordY);
-      });
-
-      const width = maxX - minX + 1;
-      const height = maxY - minY + 1;
-      cluster.width = width;
-      cluster.height = height;
-
       fill(cluster.color[0], cluster.color[1], cluster.color[2], 50);
-
-      cluster.shape = categorizeShape(cluster);
-      let x = cluster.pixels[0].coordX;
-      let y = cluster.pixels[0].coordY;
+  
+      cluster = addCustomProperties(cluster);
       let img;
-
+  
       if (cluster.shape === "I-shaped") {
         img = images[1];
       } else if (cluster.shape === "J-shaped") {
@@ -147,13 +159,14 @@ const WebcamModule = (() => {
       } else {
         img = images[5];
       }
-      // fill(cluster.color[0], cluster.color[1], cluster.color[2], 100);
-      tint(255, 255);
-      image(img, x * factor, y * factor, width * factor, height * factor);
-      tint(255, 255);
+      tint(cluster.color[0], cluster.color[1], cluster.color[2]);
+      stroke(255, 255, 255, 255);
+      rect(cluster.minX * scaleDownFactor, cluster.minY * scaleDownFactor, cluster.width * scaleDownFactor, cluster.height * scaleDownFactor);
+      tint(255,255)
     }
-    
-    // Normalize the coordinates of the pixels inside the clusters
+  }
+  
+  function normalizeClusterCoordinates() {
     for (let cluster of clusters) {
       cluster.pixels = cluster.pixels.map(pixel => {
         return {
@@ -163,6 +176,7 @@ const WebcamModule = (() => {
       });
     }
   }
+  
 
   function findClosestColor(targetColor) {
     let closestColor = colorPalette.reduce((a, b) => {
@@ -201,7 +215,7 @@ const WebcamModule = (() => {
     return dx <= 1 && dy <= 1;
   }
 
-  function categorizeShape(cluster) {
+  function addCustomProperties(cluster) {
     const pixels = cluster.pixels;
     const minX = Math.min(...pixels.map((p) => p.coordX));
     const minY = Math.min(...pixels.map((p) => p.coordY));
@@ -211,25 +225,31 @@ const WebcamModule = (() => {
     const width = maxX - minX + 1;
     const height = maxY - minY + 1;
 
+    
+
     if (width === 1 && height === 4) {
-      return "I-shaped";
+      cluster.shape = "I-shaped";
     } else if (width === 2 && height === 3) {
-      return "J-shaped";
+      cluster.shape = "J-shaped";
     } else if (
       width === 2 &&
       height === 3 &&
       pixels.find((p) => p.coordX === minX + 1 && p.coordY === minY)
     ) {
-      return "L-shaped";
+      cluster.shape = "L-shaped";
     } else if (width === 3 && height === 2) {
-      return "H-shaped";
+      cluster.shape = "H-shaped";
     } else if (width >= 2 && height >= 2 && width === height) {
-      return "Rectangle-shaped";
+      cluster.shape = "Rectangle-shaped";
     } else if (width >= 2 && height === 1) {
-      return "_-shaped";
+      cluster.shape = "_-shaped";
     } else {
-      return "Unknown";
+      cluster.shape = "Unknown";
     }
+
+    cluster = { ...cluster, minX, minY, maxX, maxY, width, height}
+
+    return cluster;
   }
 
   function getClusters() {

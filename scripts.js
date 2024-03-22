@@ -7,7 +7,7 @@ function preload() {
   WebcamModule.preload();
 }
 
-function setup() {
+async function setup() {
   WebcamModule.setup();
 }
 
