@@ -187,6 +187,9 @@ const WebcamModule = (() => {
   
 
   function findClosestColor(targetColor) {
+    if (colorPalette.length === 0) {
+      return targetColor;
+    }
     let closestColor = colorPalette.reduce((a, b) => {
       return euclideanDistance(targetColor, a) <
         euclideanDistance(targetColor, b)
@@ -271,27 +274,39 @@ const WebcamModule = (() => {
   }
 
   function updateValue(variableName, newValue) {
-    // switch (variableName) {
-    //   case "lowerThresholdFactor":
-    //     lowerThresholdFactor = newValue;
-    //     lowerThreshold = lowerThresholdFactor * scaleDownFactor;
-    //     break;
-    //   case "upperThresholdFactor":
-    //     upperThresholdFactor = newValue;
-    //     upperThreshold = upperThresholdFactor * scaleDownFactor;
-    //     break;
-    //   case "originalPixelFactor":
-    //     originalPixelFactor = newValue;
-    //     originalPixelW = 640 * originalPixelFactor;
-    //     originalPixelH = 480 * originalPixelFactor;
-    //     // newWidth = originalPixelW / scaleDownFactor;
-    //     // newHeight = originalPixelH / scaleDownFactor;
-    //     break;
-    //   default:
-    //     break;
-    //}
+    switch (variableName) {
+      case "lowerThresholdFactor":
+        lowerThresholdFactor = newValue;
+        lowerThreshold = lowerThresholdFactor * scaleDownFactor;
+        break;
+      case "upperThresholdFactor":
+        upperThresholdFactor = newValue;
+        upperThreshold = upperThresholdFactor * scaleDownFactor;
+        break;
+      case "originalPixelFactor":
+        originalPixelFactor = newValue;
+        originalPixelW = 640 * originalPixelFactor;
+        originalPixelH = 480 * originalPixelFactor;
+        // newWidth = originalPixelW / scaleDownFactor;
+        // newHeight = originalPixelH / scaleDownFactor;
+        break;
+      default:
+        break;
+    }
     console.log(`Updated ${variableName}:`, newValue);
   }
+
+    function updateColorPalette(newColorPalette) {
+      if (Array.isArray(newColorPalette) && newColorPalette.every(color => Array.isArray(color) && color.length === 3)) {
+        colorPalette = newColorPalette;
+        console.log(`Updated colorPalette:`, colorPalette);
+      } else {
+        console.log('Invalid color palette. It should be an array of arrays, each with 3 elements.');
+      }
+      colorPalette.unshift([0, 0, 0]); // Add black at the start
+      colorPalette.push([255, 255, 255]); // Add white at the end
+    }
+
 
   // Public methods here...
   return {
@@ -303,7 +318,8 @@ const WebcamModule = (() => {
       video.stop();
       video.remove();
     },
-    updateValue
+    updateValue,
+    updateColorPalette
   };
 
 
