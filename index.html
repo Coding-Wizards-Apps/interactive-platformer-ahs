@@ -4,13 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Platformer</title>
     <link rel="stylesheet" href="./css/main.css">
-   
 <body>
 
 
-    
+    <div class="webcamUI" id="webcamUI">
+        <label for="scaleDownFactor">Scale Down Factor:</label>
+    <input type="range" id="scaleDownFactor" value="20" min="1" max="100" data-variable-name="scaleDownFactor"><br>
+
+    <label for="lowerThresWoldFactor">Lower Threshold Factor:</label>
+    <input type="range" id="lowerThresholdFactor" value="0.1" min="0" max="1" step="0.1" data-variable-name="lowerThresholdFactor"><br>
+
+    <label for="upperThresholdFactor">Upper Threshold Factor:</label>
+    <input type="range" id="upperThresholdFactor" value="3" min="1" max="10" data-variable-name="upperThresholdFactor"><br>
+
+    <label for="colorSelection">Color Selection:</label>
+    <select id="colorSelection" data-variable-name="colorSelection" multiple>
+        <option value="red">Red</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="yellow">Yellow</option>
+        <option value="black">Black</option>
+        <option value="white">White</option>
+    </select>
+    <br>
+    </div>
     <div id="overlay" class="overlay">
         <div class="instructions">
         <h2>Instructions</h2>

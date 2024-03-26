@@ -1,6 +1,13 @@
 import Game from "./game-module.js";
 
 import WebcamModule from "./webcam-module.js";
+
+function updateValue(inputId, variableName) {
+  const newValue = parseFloat(document.getElementById(inputId).value);
+  WebcamModule.updateValue(variableName, newValue);
+  // window[variableName] = newValue;
+  console.log(`Updated ${variableName}:`, newValue);
+}
 let gameStarted = false;
 function preload() {
   Game.preload();
@@ -28,6 +35,15 @@ document.addEventListener("DOMContentLoaded", function () {
   // Get the overlay and close button elements
   const overlay = document.getElementById("overlay");
   const closeButton = document.getElementById("closeButton");
+
+  const inputElements = document.querySelectorAll("input");
+  inputElements.forEach((inputElement) => {
+    inputElement.addEventListener("input", function (event) {
+      const inputId = event.target.id;
+      const variableName = event.target.getAttribute("data-variable-name");
+      updateValue(inputId, variableName);
+    });
+  });
 
   // Hide the overlay by default
   overlay.style.display = "none";

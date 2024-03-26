@@ -2,14 +2,19 @@ const WebcamModule = (() => {
   let video;
   let canvas;
   const scaleDownFactor = 20;
-  let originalPixelW = 640 * 2;
-  let originalPixelH = 480 * 2;
+
+  let lowerThresholdFactor = 0.1;
+  let upperThresholdFactor = 3;
+  let originalPixelFactor = 2;
+  let originalPixelW = 640 * originalPixelFactor;
+  let originalPixelH = 480 * originalPixelFactor;
+  let lowerThreshold = lowerThresholdFactor * scaleDownFactor;
+  let upperThreshold = upperThresholdFactor * scaleDownFactor;
+
+  const displayVideo = true;
   let newWidth = originalPixelW / scaleDownFactor;
   let newHeight = originalPixelH / scaleDownFactor;
   const images = [];
-  let lowerThreshold = .1 * scaleDownFactor;
-  let upperThreshold = 3 * scaleDownFactor;
-  const displayVideo = true;
   let clusters = [];
   let grabVideo = true;
   async function setup() {
@@ -265,6 +270,29 @@ const WebcamModule = (() => {
     return clusters;
   }
 
+  function updateValue(variableName, newValue) {
+    // switch (variableName) {
+    //   case "lowerThresholdFactor":
+    //     lowerThresholdFactor = newValue;
+    //     lowerThreshold = lowerThresholdFactor * scaleDownFactor;
+    //     break;
+    //   case "upperThresholdFactor":
+    //     upperThresholdFactor = newValue;
+    //     upperThreshold = upperThresholdFactor * scaleDownFactor;
+    //     break;
+    //   case "originalPixelFactor":
+    //     originalPixelFactor = newValue;
+    //     originalPixelW = 640 * originalPixelFactor;
+    //     originalPixelH = 480 * originalPixelFactor;
+    //     // newWidth = originalPixelW / scaleDownFactor;
+    //     // newHeight = originalPixelH / scaleDownFactor;
+    //     break;
+    //   default:
+    //     break;
+    //}
+    console.log(`Updated ${variableName}:`, newValue);
+  }
+
   // Public methods here...
   return {
     setup,
@@ -275,7 +303,11 @@ const WebcamModule = (() => {
       video.stop();
       video.remove();
     },
+    updateValue
   };
+
+
+  
 })();
 
 export default WebcamModule;
