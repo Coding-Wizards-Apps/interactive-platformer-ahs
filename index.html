@@ -5,101 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Platformer</title>
     <link rel="stylesheet" href="./css/main.css" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon" />
   </head>
   <body>
-    <div class="webcamUI" id="webcamUI">
-      <!-- <label for="scaleDownFactor">Scale Down Factor:</label>
-      <input
-        type="range"
-        id="scaleDownFactor"
-        value="20"
-        min="1"
-        max="100"
-        data-variable-name="scaleDownFactor"
-      /> -->
-
-      <label for="lowerThresWoldFactor">Lower Threshold Factor:</label>
-      <input
-        type="range"
-        id="lowerThresholdFactor"
-        value="0.1"
-        min="0"
-        max="1"
-        step="0.1"
-        data-variable-name="lowerThresholdFactor"
-      />
-
-      <label for="upperThresholdFactor">Upper Threshold Factor:</label>
-      <input
-        type="range"
-        id="upperThresholdFactor"
-        value="3"
-        min="1"
-        max="10"
-        data-variable-name="upperThresholdFactor"
-      /><br />
-
-      <label for="colorSelection">Color Selection:</label>
-      <div id="colorSelection" class="colorSelection">
-        <div>
-          <input type="checkbox" id="red" name="color" value="255,0,0" />
-          <label for="red">red</label>
-        </div>
-        <div>
-          <input type="checkbox" id="blue" name="color" value="0,0,255" />
-          <label for="blue">blue</label>
-        </div>
-        <div>
-          <input type="checkbox" id="green" name="color" value="0,255,0" />
-          <label for="green">green</label>
-        </div>
-        <div>
-          <input type="checkbox" id="yellow" name="color" value="255,255,0" />
-          <label for="yellow">yellow</label>
-        </div>
-        <div>
-          <input type="checkbox" id="purple" name="color" value="128,0,128" />
-          <label for="purple">purple</label>
-        </div>
-        <div>
-          <input type="checkbox" id="orange" name="color" value="255,165,0" />
-          <label for="orange">orange</label>
-        </div>
-        <div>
-          <input type="checkbox" id="pink" name="color" value="255,192,203" />
-          <label for="pink">pink</label>
-        </div>
-        <div>
-          <input type="checkbox" id="cyan" name="color" value="0,255,255" />
-          <label for="cyan">cyan</label>
-        </div>
-        <div>
-            <input type="checkbox" id="magenta" name="color" value="255,0,255" />
-            <label for="magenta">magenta</label>
-        </div>
-        <div>
-            <input type="checkbox" id="lime" name="color" value="0,255,0" />
-            <label for="lime">lime</label>
-        </div>
-        <div>
-            <input type="checkbox" id="teal" name="color" value="0,128,128" />
-            <label for="teal">teal</label>
-        </div>
-        <div>
-            <input type="checkbox" id="maroon" name="color" value="128,0,0" />
-            <label for="maroon">maroon</label>
-        </div>
-        <div>
-            <input type="checkbox" id="olive" name="color" value="128,128,0" />
-            <label for="olive">olive</label>
-        </div>
-        <div>
-            <input type="checkbox" id="navy" name="color" value="0,0,128" />
-            <label for="navy">navy</label>
-        </div>
+    <div class="webcamUI hidden" id="webcamUI">
+      <div>
+        <label for="lowerThresWoldFactor">Lower Threshold Factor:</label>
+        <input
+          type="range"
+          id="lowerThresholdFactor"
+          value="0.1"
+          min="0"
+          max="5"
+          step="0.1"
+          data-variable-name="lowerThresholdFactor"
+        />
+        <p id="lowerThresholdFactorValue">0.1</p>
       </div>
+<div>
+  <label for="upperThresholdFactor">Upper Threshold Factor:</label>
+  <input
+    type="range"
+    id="upperThresholdFactor"
+    value="3"
+    min="0"
+    max="20"
+    data-variable-name="upperThresholdFactor"
+  /><br />
+  <p id="upperThresholdFactorValue">3</p>
+</div>
+<div>
+  <label for="maxEucledianDistance">Max eucledian distance</label>
+  <input
+    type="range"
+    id="maxEucledianDistance"
+    value="250"
+    min="100"
+    max="700"
+    data-variable-name="maxEucledianDistance"
+  /><br />
+  <p id="maxEucledianDistanceValue">250</p>
+</div>
+<div>
+  <label for="whiteFactor">White factor</label>
+  <input
+    type="range"
+    id="whiteFactor"
+    value="1.5"
+    min="1"
+    max="1.5"
+    step="0.1"
+    data-variable-name="whiteFactor"
+  /><br />
+  <p id="whiteFactorValue">1.5</p>
+</div>
+      <label for="colorSelection">Color Selection:</label>
+      <div id="colorSelection" class="colorSelection"></div>
     </div>
-    <div id="overlay" class="overlay">
+    <div id="overlay" class="overlay hidden">
       <div class="instructions">
         <h2>Instructions</h2>
         <p>
@@ -109,13 +72,38 @@
         <button id="closeButton" class="closeButton">Close</button>
       </div>
     </div>
-    <div class="playbutton" id="playButton">PLAY</div>
+    <div class="playbutton" id="playButton">Hold down and let go to play</div>
     <div id="canvasPlay"></div>
     <div id="highscore" class="highscore"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://p5play.org/v3/planck.min.js"></script>
     <script src="https://p5play.org/v3/p5play.js"></script>
-
-    <script src="./scripts.js" type="module"></script>
+    <script src="./js/scripts.js" type="module"></script>
+    <script>
+      document
+        .getElementById("lowerThresholdFactor")
+        .addEventListener("input", function () {
+          document.getElementById("lowerThresholdFactorValue").textContent =
+            this.value;
+        });
+      document
+        .getElementById("upperThresholdFactor")
+        .addEventListener("input", function () {
+          document.getElementById("upperThresholdFactorValue").textContent =
+            this.value;
+        });
+        document
+        .getElementById("maxEucledianDistance")
+        .addEventListener("input", function () {
+          document.getElementById("maxEucledianDistanceValue").textContent =
+            this.value;
+        });
+        document
+        .getElementById("whiteFactor")
+        .addEventListener("input", function () {
+          document.getElementById("whiteFactorValue").textContent =
+            this.value;
+        });
+    </script>
   </body>
 </html>

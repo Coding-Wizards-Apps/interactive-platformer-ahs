@@ -1,11 +1,18 @@
+@font-face {
+  font-family: 'Facede-Ouest';
+  src: url('../assets/Facade-font-master/fonts/Facade-Est.otf') ;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Facede-Ouest', sans-serif;
 }
 
 body {
-    overflow: hidden
+    overflow: hidden;
+    font-family: sans-serif;
 }
 
 main {
@@ -138,4 +145,8 @@ canvas {
 .colorSelection > div {
   display: flex;
   align-items: center;
+}
+
+.hidden{
+  display: none;
 }
