@@ -31,8 +31,20 @@ async function createColorCheckboxes() {
         div.appendChild(checkbox);
         div.appendChild(label);
         // Add event listener to each checkbox
-        checkbox.addEventListener("change", function () {
-          let selectedColors = [];
+        checkbox.addEventListener("change", colorCheckboxChanged);
+        colorSelectionDiv.appendChild(div);
+      }
+      );
+    }).then(() => {
+      colorCheckboxChanged();
+    })
+    .catch((error) => console.error("Error:", error));
+    console.log("Default colors:", defaultColors);
+}
+
+
+function colorCheckboxChanged() {
+  let selectedColors = [];
           document
             .querySelectorAll('input[type="checkbox"]:checked')
             .forEach(function (cb) {
@@ -42,14 +54,7 @@ async function createColorCheckboxes() {
           console.log(selectedColors); // You can see the selected colors array in the console
           // Assuming you have a WebcamModule with an updateColorPalette function
           WebcamModule.updateColorPalette(selectedColors);
-        });
-        colorSelectionDiv.appendChild(div);
-      });
-    })
-    .catch((error) => console.error("Error:", error));
-    WebcamModule.updateColorPalette(defaultColors);
-    console.log("Default colors:", defaultColors);
-}
+        };
 
 
 

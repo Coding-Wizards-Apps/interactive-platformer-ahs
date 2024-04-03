@@ -1,4 +1,4 @@
-import { createPlatforms } from "./platforms.js";
+import { createPlatforms } from './platforms.js';
 
 const Game = (() => {
   let playOnline = false;
@@ -55,12 +55,12 @@ const Game = (() => {
     text(scoreText, config.width - 200, 50);
   }
   function preload() {
-    sky = loadImage("assets/sky.png");
-    ground = loadImage("assets/platform.png");
+    sky = loadImage('assets/sky.png');
+    ground = loadImage('assets/platform.png');
     // playerImg = loadImage("assets/Colorful_Super_ball.png");
-    doorImg = loadImage("assets/door.png");
-    bulletImg = loadImage("assets/dentures.png");
-    enemyImg = loadImage("assets/monster.png");
+    doorImg = loadImage('assets/door.png');
+    bulletImg = loadImage('assets/dentures.png');
+    enemyImg = loadImage('assets/monster.png');
   }
 
   function setup(clusters) {
@@ -76,10 +76,7 @@ const Game = (() => {
     drawBackground();
     // create some enemies at random positions
     for (let i = 0; i < 5; i++) {
-      createEnemy(
-        (config.width) / 100,
-        (config.height) / 100 - 20
-      );
+      createEnemy(config.width / 100, config.height / 100 - 20);
     }
     bullets = new Group();
     bullets.img = bulletImg;
@@ -93,11 +90,11 @@ const Game = (() => {
     }
 
     document
-      .querySelector("#defaultCanvas0")
-      .style.setProperty("width", `${config.width}px`, "important");
+      .querySelector('#defaultCanvas0')
+      .style.setProperty('width', `${config.width}px`, 'important');
     document
-      .querySelector("#defaultCanvas0")
-      .style.setProperty("height", `${config.height}px`, "important");
+      .querySelector('#defaultCanvas0')
+      .style.setProperty('height', `${config.height}px`, 'important');
   }
 
   function draw() {
@@ -109,12 +106,33 @@ const Game = (() => {
     checkPlayerDoorCollision();
     updateHighScore();
     displayHighScore();
+    checkPlatformCollision();
     if (playOnline) {
       adjustCameraPosition();
     }
 
     if (player.velocity.y > 20) {
       player.velocity.y = 0;
+    }
+  }
+
+  function checkPlatformCollision() {
+    for (let i = 0; i < platforms.length; i++) {
+      let platform = platforms[i];
+      if (player.collide(platform)) {
+        if (platform.type === 'bouncy') {
+          player.velocity.y = -20;
+        } else if (platform.type === 'slow') {
+          player.velocity.x = playerDirection * 1;
+        } else if (platform.type === 'temp') {
+          setTimeout(() => {
+            player.collide(platform, false);
+          }, 3000);
+        }
+        else if (platform.type === "slippery"){
+          player.velocity.x = playerDirection * 3;
+        }
+      }
     }
   }
 
@@ -171,11 +189,9 @@ const Game = (() => {
       if (!enemy.framesRemaining) {
         // console.log("enemy", enemy);
         enemy.framesRemaining = Math.floor(Math.random() * 10) + 150;
-        console.log(platforms)
         let platformUnderneath = platforms.find(
           (platform) =>
-          platform.y > enemy.position.y &&
-          platform.y - enemy.position.y < 60
+            platform.y > enemy.position.y && platform.y - enemy.position.y < 60
         );
         if (platformUnderneath) {
           enemy.directionX = Math.random() < 0.5 ? -0.5 : 0.5;
@@ -215,9 +231,9 @@ const Game = (() => {
       noLoop();
       let endTime = Date.now();
       let highscore = Math.floor((endTime - startTime) / 1000);
-      let highScoreElement = document.querySelector("#highscore");
+      let highScoreElement = document.querySelector('#highscore');
       highScoreElement.innerText = `High Score: ${highscore}s`;
-      highScoreElement.style.display = "block";
+      highScoreElement.style.display = 'block';
     }
   }
 
@@ -227,15 +243,24 @@ const Game = (() => {
 
   function resetGame() {
     // Reset player position
-    player.position.x = config.width / 2;
+    player.position.x = 50;
     player.position.y = config.height - 50;
-
+    player.velocity.x = 0;
+    player.velocity.y = 0;
     // Reset enemy positions
     for (let i = 0; i < enemies.length; i++) {
-      let cluster = clusterList[Math.floor(Math.random() * clusterList.length)];
-      enemies[i].position.x = (cluster.pixels[0].coordX * config.width) / 100;
-      enemies[i].position.y =
-        (cluster.pixels[0].coordY * config.height) / 100 - 20;
+      if (clusterList.length === 0) {
+        let x = Math.floor(Math.random() * config.width);
+        let y = Math.floor(Math.random() * config.height);
+        enemies[i].position.x = x;
+        enemies[i].position.y = y;
+      } else {
+        let cluster =
+          clusterList[Math.floor(Math.random() * clusterList.length)];
+        enemies[i].position.x = (cluster.pixels[0].coordX * config.width) / 100;
+        enemies[i].position.y =
+          (cluster.pixels[0].coordY * config.height) / 100 - 20;
+      }
     }
 
     // Remove allbullets
@@ -267,7 +292,7 @@ const Game = (() => {
     floor.y = config.height - 5;
     floor.w = config.width;
     floor.h = 5;
-    floor.collider = "static";
+    floor.collider = 'static';
   }
 
   function createBorders() {
@@ -276,14 +301,14 @@ const Game = (() => {
     leftBorder.y = config.height / 2;
     leftBorder.w = 5;
     leftBorder.h = config.height;
-    leftBorder.collider = "static";
+    leftBorder.collider = 'static';
 
     let rightBorder = new Sprite();
     rightBorder.x = config.width + 5;
     rightBorder.y = config.height / 2;
     rightBorder.w = 5;
     rightBorder.h = config.height;
-    rightBorder.collider = "static";
+    rightBorder.collider = 'static';
   }
 
   function createPlayer() {
@@ -295,8 +320,6 @@ const Game = (() => {
     player.y = config.height - 50;
   }
 
-  
-
   function createEnemy(x, y) {
     let enemy = createSprite(x, y - 100);
     enemy.img = enemyImg;
@@ -307,10 +330,13 @@ const Game = (() => {
   }
 
   function createDoor() {
-    door = createSprite(config.width -100, 10);
-    door.img = doorImg;
-    door.collider = "static";
+    door = createSprite(config.width - 100, 10);
+    // door.img = doorImg;
+    door.collider = 'static';
     door.scale.x = 4.5;
+    door.color = 'red';
+    `    // door.addAnimation("glow", "assets/glow1.png", "assets/glow2.png", "assets/glow3.png");
+    // door.animation.play("glow");`;
   }
 
   function drawBackground() {

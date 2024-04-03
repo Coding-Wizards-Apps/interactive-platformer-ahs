@@ -1,13 +1,13 @@
 @font-face {
-  font-family: 'Facede-Ouest';
-  src: url('../assets/Facade-font-master/fonts/Facade-Est.otf') ;
+  font-family: 'Facede';
+  src: url('../assets/Facade-font-master/fonts/Facade-Sud-Ouest.otf') ;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Facede-Ouest', sans-serif;
+    font-family: 'Facede', sans-serif;
 }
 
 body {
@@ -104,6 +104,7 @@ canvas {
   position: absolute;
   top: 0%;
   right: 0%;
+  font-family: sans-serif;
 }
 
 .webcamUI {

@@ -20,6 +20,9 @@ const WebcamModule = (() => {
   let newHeight = originalPixelH / scaleDownFactor;
   let clusters = [];
   let grabVideo = true;
+
+  let colorPalette = [];
+
   async function setup() {
     canvas = createCanvas(
       newWidth * scaleDownFactor,
@@ -211,7 +214,6 @@ const WebcamModule = (() => {
     return Math.sqrt(sum);
   }
 
-  let colorPalette = [];
 
   function areNeighbors(pixelA, pixelB) {
     const dx = Math.abs(pixelA.coordX - pixelB.coordX);
@@ -235,25 +237,25 @@ const WebcamModule = (() => {
     const normalizedWidth = (pixelWidth / newWidth) * scaleDownFactor ;
     const normalizedHeight = (pixelHeight / newHeight) * scaleDownFactor;
 
-    if (pixelWidth === 1 && pixelHeight === 4) {
-      cluster.shape = "I-shaped";
-    } else if (pixelWidth === 2 && pixelHeight === 3) {
-      cluster.shape = "J-shaped";
-    } else if (
-      pixelWidth === 2 &&
-      pixelHeight === 3 &&
-      pixels.find((p) => p.coordX === minX + 1 && p.coordY === minY)
-    ) {
-      cluster.shape = "L-shaped";
-    } else if (pixelWidth === 3 && pixelHeight === 2) {
-      cluster.shape = "H-shaped";
-    } else if (pixelWidth >= 2 && pixelHeight >= 2 && pixelWidth === pixelHeight) {
-      cluster.shape = "Rectangle-shaped";
-    } else if (pixelWidth >= 2 && pixelHeight === 1) {
-      cluster.shape = "_-shaped";
-    } else {
-      cluster.shape = "Unknown";
-    }
+    // if (pixelWidth === 1 && pixelHeight === 4) {
+    //   cluster.shape = "I-shaped";
+    // } else if (pixelWidth === 2 && pixelHeight === 3) {
+    //   cluster.shape = "J-shaped";
+    // } else if (
+    //   pixelWidth === 2 &&
+    //   pixelHeight === 3 &&
+    //   pixels.find((p) => p.coordX === minX + 1 && p.coordY === minY)
+    // ) {
+    //   cluster.shape = "L-shaped";
+    // } else if (pixelWidth === 3 && pixelHeight === 2) {
+    //   cluster.shape = "H-shaped";
+    // } else if (pixelWidth >= 2 && pixelHeight >= 2 && pixelWidth === pixelHeight) {
+    //   cluster.shape = "Rectangle-shaped";
+    // } else if (pixelWidth >= 2 && pixelHeight === 1) {
+    //   cluster.shape = "_-shaped";
+    // } else {
+    //   cluster.shape = "Unknown";
+    // }
 
     cluster = {
       ...cluster,
