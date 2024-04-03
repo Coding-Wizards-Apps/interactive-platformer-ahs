@@ -69,6 +69,7 @@ async function initializeInputElements() {
       const inputId = event.target.id;
       const variableName = event.target.getAttribute("data-variable-name");
       updateValue(inputId, variableName);
+      
     });
   });
 }
