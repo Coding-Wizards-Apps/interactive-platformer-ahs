@@ -8,6 +8,8 @@ import {
 const Game = (() => {
   let playOnline = false;
   let enemyFactor = 0.5;
+  let initialPoints = 300;
+  let currentPoints = initialPoints;
   let config = {
     width: window.innerWidth,
     height: playOnline ? window.innerHeight * 1.1 : window.innerHeight * 1,
@@ -45,19 +47,6 @@ const Game = (() => {
 
   let clusterList = null;
 
-  function updateHighScore() {
-    let currentTime = Math.floor((Date.now() - startTime) / 1000);
-    if (currentTime > highScore) {
-      highScore = currentTime;
-    }
-    scoreText = `High Score: ${highScore}s`;
-  }
-
-  function displayHighScore() {
-    fill(255);
-    textSize(32);
-    text(scoreText, 50, 50);
-  }
   function preload() {
     backgroundImage = loadImage("assets/Background.png");
     // ground = loadImage("assets/platform.png");
@@ -76,7 +65,6 @@ const Game = (() => {
     createFloor();
     createBorders();
     createPlayer();
-    console.log("clusters", clusters);
     platforms = createPlatforms(clusters, config, canvas);
     createGoal();
     // create some enemies at random positions
@@ -101,6 +89,21 @@ const Game = (() => {
 
     drawBackground(255);
     stroke(255);
+    clusters.forEach((cluster) => {
+      switch (cluster.metadata.type) {
+        case "bouncy":
+          currentPoints -= 20;
+          break;
+        case "temp":
+          currentPoints -= 4;
+          break;
+        case "slow":
+          currentPoints -= 7;
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   function draw() {
@@ -266,24 +269,39 @@ const Game = (() => {
     if (player.collide(goal)) {
       noLoop();
       let endTime = Date.now();
-      let highscore = Math.floor((endTime - startTime) / 1000);
-      let highScoreElement = document.querySelector("#highscore");
-      highScoreElement.innerText = `High Score: ${highscore}s`;
-      highScoreElement.style.display = "block";
+      let highscore = currentPoints - Math.floor((endTime - startTime) / 1000);
       saveHighScore(highscore);
-      displayHighScores();
+      displayHighScores(highScore);
     }
   }
 
-  function displayHighScores() {
+  function updateHighScore() {
+    let currentTime = Math.floor((Date.now() - startTime) / 1000);
+
+    highScore = currentPoints - currentTime;
+
+    scoreText = `Highscore: ${highScore}s`;
+  }
+
+  function displayHighScore() {
+    fill(255);
+    textSize(32);
+    text(scoreText, 50, 50);
+  }
+
+  function displayHighScores(highScore) {
     let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+    let highscoreElement = document.querySelector("#highscores");
+    let personalHighscoreElement = document.querySelector("#highscore");
     let highScoreList = document.querySelector("#highscore-list");
     highScoreList.innerHTML = "";
+    personalHighscoreElement.innerText = `Your score: ${highScore}s`;
     for (let i = 0; i < highScores.length; i++) {
       let li = document.createElement("li");
       li.innerText = `${highScores[i].name}: ${highScores[i].score}s`;
       highScoreList.appendChild(li);
     }
+    highscoreElement.style.display = "block";
   }
   function saveHighScore(highscore) {
     let playerName = "Player" + Math.floor(Math.random() * 1000);
@@ -292,7 +310,7 @@ const Game = (() => {
       let newScore = { name: playerName, score: highscore };
       highScores.push(newScore);
       highScores.sort((a, b) => b.score - a.score);
-      highScores.splice(10); // Keep only top 5 scores
+      highScores.splice(5); // Keep only top 5 scores
       localStorage.setItem("highScores", JSON.stringify(highScores));
     }
   }
@@ -305,12 +323,12 @@ const Game = (() => {
     resetPlayer();
     // Reset enemy positions
     resetEnemies(platforms);
-    startTime = Date.now();
+    // startTime = Date.now();
+    // highScore = 0;
     // Reset platforms
     for (let i = 0; i < platforms.length; i++) {
       resetPlatform(platforms[i]);
     }
-    highScore = 0;
     // Remove allbullets
     for (let i = bulletInstances.length - 1; i >= 0; i--) {
       bulletInstances[i].remove();
