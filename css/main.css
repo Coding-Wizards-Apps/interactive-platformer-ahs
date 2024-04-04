@@ -14,6 +14,7 @@ body {
     overflow: hidden;
     font-family: sans-serif;
     display: relative;
+    background: white;
 }
 
 main {
@@ -30,6 +31,7 @@ main {
 canvas {
     /* margin: 0 auto !important; */
     image-rendering: pixelated;
+    z-index: -1;
 }
 
 
@@ -45,18 +47,19 @@ canvas {
 
 .playbutton{
     position: absolute;
-    bottom: 5%;
+    bottom: 3%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #f1f1f1;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
     color: black;
     text-decoration: none;
     transition: 0.3s;
+    z-index: 10;
 }
 
 .highscore{
@@ -92,6 +95,7 @@ canvas {
   width: 100vw;
   height: 100vh;
   flex-flow: column;
+  z-index: 10;
 }
 
 .closeButton {
@@ -105,6 +109,7 @@ canvas {
   background-color: #f1f1f1;
   text-decoration: none;
   transition: 0.3s;
+  z-index: 10;
 }
 
 
@@ -116,6 +121,7 @@ canvas {
   font-family: sans-serif;
   overflow: scroll;
   max-height: 100%;
+  z-index: 10;
 }
 
 .webcamUI {
@@ -161,4 +167,13 @@ canvas {
 
 .hidden{
   display: none;
+}
+
+.canvasPlay{
+  margin: 0px 0;
+  transform: scale(0.9);  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -1;
 }

@@ -5,7 +5,6 @@ const Game = (() => {
   let enemyFactor = .5;
   let config = {
     width: window.innerWidth,
-
     height: playOnline ? window.innerHeight * 1.1 : window.innerHeight * 1,
   };
 
@@ -67,10 +66,12 @@ const Game = (() => {
     clusterList = clusters;
     startTime = Date.now();
     let canvas = createCanvas(config.width, config.height);
+    canvas.parent("canvasPlay"); // Set parent to canvas1
     setupWorld();
     createFloor();
     createBorders();
     createPlayer();
+    console.log("clusters", clusters);  
     platforms = createPlatforms(clusters, config, canvas);
     createGoal();
     // create some enemies at random positions
@@ -118,6 +119,7 @@ const Game = (() => {
     displayHighScore();
   }
 
+  
   function createEnemies(platforms) {
     for (let i = 0; i < platforms.length; i++) {
       let platform = platforms[i];
@@ -280,7 +282,6 @@ const Game = (() => {
     }
   }
   function saveHighScore(highscore) {
-     
     let playerName = "Player" + Math.floor(Math.random() * 1000);
     if (playerName != null) {
       let highScores = JSON.parse(localStorage.getItem("highScores")) || [];

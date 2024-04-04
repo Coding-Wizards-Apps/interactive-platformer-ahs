@@ -1,10 +1,10 @@
-import colors from "./colors.js";
-import { gameStarted } from "./ui.js";
+import colors from "../js/colors.js";
 
 const WebcamModule = (() => {
   let video;
   let canvas;
 
+  let black = [0, 0, 0];
   let whiteFactor = 1.1;
   let maxEuclideanDistance = 200;
   let defaultColors = [
@@ -17,17 +17,15 @@ const WebcamModule = (() => {
       name: "white",
     },
   ];
-
-  const clusterOpacity = 20;
   const scaleDownFactor = 20;
 
-  let lowerPixelThresholdFactor = 0.1;
-  let upperPixelThresholdFactor = 3;
+  let lowerThresholdFactor = 0.1;
+  let upperThresholdFactor = 3;
   let originalPixelFactor = 2;
   let originalPixelW = 720 * originalPixelFactor;
   let originalPixelH = 480 * originalPixelFactor;
-  let lowerPixelThreshold = lowerPixelThresholdFactor * scaleDownFactor;
-  let upperPixelThreshold = upperPixelThresholdFactor * scaleDownFactor;
+  let lowerThreshold = lowerThresholdFactor * scaleDownFactor;
+  let upperThreshold = upperThresholdFactor * scaleDownFactor;
 
   let displayVideo = false;
   let displayClusters = true;
@@ -84,7 +82,6 @@ const WebcamModule = (() => {
   }
 
   function draw() {
-    if(!gameStarted) {
     clear();
     clusters = [];
     video.loadPixels();
@@ -106,42 +103,39 @@ const WebcamModule = (() => {
       drawClusterShapes();
     }
   }
-  }
 
   function processPixels(pixels) {
+
     for (let y = 0; y < pixels.length; y++) {
       let index = y * 4;
       let r = pixels[index];
       let g = pixels[index + 1];
       let b = pixels[index + 2];
       let closestColor = findClosestColor([r, g, b]);
+
       pixels[index] = closestColor[0];
       pixels[index + 1] = closestColor[1];
       pixels[index + 2] = closestColor[2];
-
-      let color = [closestColor[0], closestColor[1], closestColor[2]];
       
-      if (
-        colorIsDefaultColor(color) ||
-        colorIsBackground(color) ||
-        euclideanDistance(color, [r, g, b]) > maxEuclideanDistance
-      ) {
-        continue;
-      }
+      let color = [closestColor[0], closestColor[1], closestColor[2]];
       let coordX = y % newWidth;
       let coordY = Math.round(y / newWidth);
       let addedToCluster = false;
+      // added euclidian distance to filter out colors that are too far from the palette
+      if (
+        colorIsDefaultColor(color) ||
+        euclideanDistance(color, [r, g, b]) > maxEuclideanDistance ||
+        colorIsBackground(color)
+      ) {
+        continue;
+      }
+
       updateClusters(color, coordX, coordY, addedToCluster);
     }
   }
 
   function colorIsBackground(color) {
-    const backgroundColor = colors.colors.find(
-      (color) => color.type === "background"
-    );
-    if (!backgroundColor) {
-      return false;
-    }
+    const backgroundColor = colors.colors.find((color) => color.type === "background");
     const backgroundRGB = backgroundColor.rgbColor.split(",");
     return (
       color[0] === backgroundRGB[0] &&
@@ -151,32 +145,29 @@ const WebcamModule = (() => {
   }
 
   function colorIsDefaultColor(color) {
-    let isDefaultColor = false;
     defaultColors.forEach((defaultColor) => {
+
       if (
         color[0] === defaultColor.rgbColor[0] &&
         color[1] === defaultColor.rgbColor[1] &&
         color[2] === defaultColor.rgbColor[2]
       ) {
-        isDefaultColor = true;
+        return true;
       }
     });
-    return isDefaultColor;
+    return false;
   }
 
   function updateClusters(color, coordX, coordY, addedToCluster) {
     for (let cluster of clusters) {
-      if (clusterHasSameColor(cluster, color) && cluster.pixels.length < upperPixelThreshold) {
+      if (clusterHasSameColor(cluster, color)) {
         addedToCluster = addPixelToCluster(cluster, coordX, coordY);
         if (addedToCluster) break;
       }
     }
 
     if (!addedToCluster) {
-      let metadata = colors.colors.find(
-        (c) => c.rgbColor === `${color[0]},${color[1]},${color[2]}`
-      );
-      clusters.push({ color, pixels: [{ coordX, coordY }], metadata});
+      clusters.push({ color, pixels: [{ coordX, coordY }] });
     }
   }
 
@@ -222,14 +213,14 @@ const WebcamModule = (() => {
   function filterClusters() {
     clusters = clusters.filter(
       ({ pixels }) =>
-        pixels.length > lowerPixelThreshold && pixels.length < upperPixelThreshold
+        pixels.length > lowerThreshold && pixels.length < upperThreshold
     );
   }
 
   function drawClusterShapes() {
     for (let cluster of clusters) {
       fill(cluster.color[0], cluster.color[1], cluster.color[2], 20);
-      tint(255, clusterOpacity);
+      tint(255, 2);
       stroke(0, 0, 0, 255);
       rect(
         cluster.minX * scaleDownFactor,
@@ -285,7 +276,7 @@ const WebcamModule = (() => {
     const pixelHeight = maxY - minY + 1;
     const normalizedWidth = (pixelWidth / newWidth) * scaleDownFactor;
     const normalizedHeight = (pixelHeight / newHeight) * scaleDownFactor;
-    // cluster.color = colors.colors.find((color) => color.rgbColor === `${cluster.color[0]},${cluster.color[1]},${cluster.color[2]}`);
+
     cluster = {
       ...cluster,
       minX,
@@ -311,13 +302,13 @@ const WebcamModule = (() => {
 
   function updateValue(variableName, newValue) {
     switch (variableName) {
-      case "lowerPixelThresholdFactor":
-        lowerPixelThresholdFactor = newValue;
-        lowerPixelThreshold = lowerPixelThresholdFactor * scaleDownFactor;
+      case "lowerThresholdFactor":
+        lowerThresholdFactor = newValue;
+        lowerThreshold = lowerThresholdFactor * scaleDownFactor;
         break;
-      case "upperPixelThresholdFactor":
-        upperPixelThresholdFactor = newValue;
-        upperPixelThreshold = upperPixelThresholdFactor * scaleDownFactor;
+      case "upperThresholdFactor":
+        upperThresholdFactor = newValue;
+        upperThreshold = upperThresholdFactor * scaleDownFactor;
         break;
       case "originalPixelFactor":
         originalPixelFactor = newValue;
@@ -331,11 +322,7 @@ const WebcamModule = (() => {
         break;
       case "whiteFactor":
         whiteFactor = newValue;
-        defaultColors[1].rgbColor = [
-          255 * whiteFactor,
-          255 * whiteFactor,
-          255 * whiteFactor,
-        ];
+        defaultColors[1].rgbColor = [255 * whiteFactor, 255 * whiteFactor, 255 * whiteFactor];
         break;
       default:
         break;
@@ -343,8 +330,6 @@ const WebcamModule = (() => {
   }
 
   function updateColorPalette(newColorPalette) {
-    colorPalette = [];
-    colorPalette.push(defaultColors.find((color) => color.name === "white"));
     // Assuming newColorPalette is an array of objects with 'name' and 'color' properties
     newColorPalette.forEach((color) => {
       if (
@@ -364,7 +349,11 @@ const WebcamModule = (() => {
       );
     }
 
-    colorPalette.push(defaultColors.find((color) => color.name === "black"));
+    defaultColors.forEach((color) => {
+      if (!colorPalette.find((c) => c.name === color.name)) {
+        colorPalette.push({ name: color.name, rgbColor: color.rgbColor });
+      }
+    });
   }
 
   // Public methods here...

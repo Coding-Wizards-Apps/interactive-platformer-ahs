@@ -26,11 +26,9 @@ async function setup() {
 
 function draw() {
   if (gameStarted) {
-
     Game.draw();
   } else {
     WebcamModule.draw();
-
   }
 }
 

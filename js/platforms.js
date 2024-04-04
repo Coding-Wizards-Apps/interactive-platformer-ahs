@@ -3,28 +3,16 @@ function createPlatforms(clusters, config, canvas) {
   let platforms = new Group();
   platforms.collider = "static";
 
-  let clusterColors = clusters.map((cluster) => cluster.color);
-  const uniqueColors = Array.from(
-    new Set(clusterColors.map(JSON.stringify)),
-    JSON.parse
-  );
-  let platformTypes = [];
-  const platformActionTypes = [
-    { type: "bouncy", color: ["255", "0", "0"], stringColor: "red" },
-    { type: "slow", color: ["0", "255", "0"], stringColor: "green" },
-    { type: "temp", color: ["0", "0", "255"], stringColor: "blue" },
-    { type: "bouncy", color: ["128", "0", "128"], stringColor: "purple" },
+  const uniqueClusters = getUniqueMetadataObjects(clusters);
 
-  ];
-  for (let color of uniqueColors) {
-    let platform = new platforms.Group();
-    let platformType = platformActionTypes.find((type) => {
-      return color.toString() === type.color.toString();
-    });
-    
-    platform.originalColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-    platform.type = platformType ? platformType : "normal";
-    platform.color = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+  let platformTypes = [];
+
+  for (let cluster of uniqueClusters) {
+    console.log(cluster)
+    let platform = new platforms.Group();    
+    platform.originalColor = `rgb(${cluster.rgbColor})`;
+    platform.type = cluster.type ? cluster.type : "normal";
+    platform.color = `rgb(${cluster.rgbColor})`;
     platformTypes.push(platform);
   }
   let { width, height } = WebcamModule.getCanvasDimensions();
@@ -36,15 +24,13 @@ function createPlatforms(clusters, config, canvas) {
     }
   } else {
     for (let cluster of clusters) {
-      let platformType = platformTypes.find((type) => {
+      let platformType = platformTypes.find((platformTypeElement) => {
         return (
-          type.color ===
-          `rgb(${cluster.color[0]}, ${cluster.color[1]}, ${cluster.color[2]})`
+          platformTypeElement.type === cluster.metadata.type
         );
       });
-      console.log(platformType.type);
       createPlatform(
-        platformType,
+        platformType ? platformType : platforms,
         config,
         (cluster.normalizedMinX * canvas.width) / 100,
         (((cluster.normalizedMinY * canvas.height) / aspectRatioWebcam) *
@@ -59,6 +45,14 @@ function createPlatforms(clusters, config, canvas) {
   return platforms;
 }
 
+// Function to get unique metadata objects
+function getUniqueMetadataObjects(array) {
+  const uniqueMetadata = new Set();
+  for (const obj of array) {
+    uniqueMetadata.add(JSON.stringify(obj.metadata));
+  }
+  return Array.from(uniqueMetadata).map(metadata => JSON.parse(metadata));
+}
 function createPlatform(platformType, config, x, y, w, h, color) {
   w = w * 5;
   h = h * 5;

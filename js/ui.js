@@ -1,46 +1,40 @@
 import WebcamModule from "./webcam-module.js";
 import Game from "./game-module.js";
+import colors from "./colors.js";
+
 let gameStarted = false;
 
 // Function to create checkboxes based on JSON data
-async function createColorCheckboxes() {
+function createColorCheckboxes() {
   // Fetch the JSON data
   let colorSelectionDiv = document.getElementById("colorSelection");
   let defaultColors = [];
-  fetch("colors.json")
-    .then((response) => response.json())
-    .then((colors) => {
-      // Loop through the JSON data and create checkboxes
-      colors.colors.forEach((color) => {
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = color.id;
-        checkbox.name = "color";
-        checkbox.value = color.value;
-        checkbox.setAttribute("data-string-color", color.name);
-        if (color.default) {
-          checkbox.checked = true;
-          let defaultColor = color.value.split(",");
-          defaultColors.push(defaultColor);
-        }
-        const label = document.createElement("label");
-        label.htmlFor = color.id;
-        label.textContent = color.name;
+  // Loop through the JSON data and create checkboxes
+  colors.colors.forEach((color) => {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = color.id;
+    checkbox.name = "color";
+    checkbox.value = color.rgbColor;
+    checkbox.setAttribute("data-string-color", color.name);
+    if (color.default) {
+      checkbox.checked = true;
+      let defaultColor = color.rgbColor.split(",");
+      defaultColors.push(defaultColor);
+    }
+    const label = document.createElement("label");
+    label.htmlFor = color.id;
+    label.textContent = color.name;
 
-        const div = document.createElement("div");
+    const div = document.createElement("div");
 
-        div.appendChild(checkbox);
-        div.appendChild(label);
-        // Add event listener to each checkbox
-        checkbox.addEventListener("change", colorCheckboxChanged);
-        colorSelectionDiv.appendChild(div);
-      });
-    })
-    .then(() => {
-      colorCheckboxChanged();
-    })
-    .catch((error) => console.error("Error:", error));
-  console.log("Default colors:", defaultColors);
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    // Add event listener to each checkbox
+    checkbox.addEventListener("change", colorCheckboxChanged);
+    colorSelectionDiv.appendChild(div);
+  });
+  colorCheckboxChanged();
 }
 
 function colorCheckboxChanged() {
@@ -48,8 +42,12 @@ function colorCheckboxChanged() {
   document
     .querySelectorAll('input[type="checkbox"]:checked')
     .forEach(function (cb) {
-      let color = cb.value.split(",");
-      selectedColors.push(color);
+      let rgbColor = cb.value.split(",");
+      let name = cb.getAttribute("data-string-color");
+      selectedColors.push({
+        rgbColor,
+        name,
+      });
     });
   // Assuming you have a WebcamModule with an updateColorPalette function
   WebcamModule.updateColorPalette(selectedColors);
@@ -79,8 +77,8 @@ function playButtonClicked() {
   console.log("Play button clicked");
   playButton.style.display = "none";
 
-  WebcamModule.stopWebcam();
   if (!gameStarted) {
+    WebcamModule.stopWebcam();
     Game.setup(WebcamModule.getClusters());
   } else {
     Game.resetGame();
@@ -134,8 +132,9 @@ function loadLocalStorageUIConfig() {
       if (uiConfig[variableName]) {
         inputElement.value = uiConfig[variableName];
         console.log(`Updated ${variableName}:`, uiConfig[variableName]);
-        const correspondingTextElement = document.querySelector(`#${variableName}Value`);
-        console.log("Corresponding text element:", correspondingTextElement);
+        const correspondingTextElement = document.querySelector(
+          `#${variableName}Value`
+        );
         if (correspondingTextElement) {
           correspondingTextElement.textContent = uiConfig[variableName];
         }
@@ -159,5 +158,5 @@ export {
   initializePlayButton,
   gameStarted,
   playButtonClicked,
-  loadLocalStorageUIConfig
+  loadLocalStorageUIConfig,
 };
