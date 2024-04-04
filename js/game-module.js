@@ -8,11 +8,13 @@ import {
 const Game = (() => {
   let playOnline = false;
   let enemyFactor = 0.5;
-  let initialPoints = 300;
+  let initialPoints = 500;
+  let platformFactor = .25;
   let currentPoints = initialPoints;
+  let smallFactor = 0.5;
   let config = {
-    width: window.innerWidth,
-    height: playOnline ? window.innerHeight * 1.1 : window.innerHeight * 1,
+    width: window.innerWidth * smallFactor,
+    height: playOnline ? window.innerHeight * 1.1 : window.innerHeight * 1 *smallFactor,
   };
 
   // Variables related to player
@@ -80,25 +82,25 @@ const Game = (() => {
       }
     }
 
-    document
-      .querySelector("#defaultCanvas0")
-      .style.setProperty("width", `${config.width}px`, "important");
-    document
-      .querySelector("#defaultCanvas0")
-      .style.setProperty("height", `${config.height}px`, "important");
+    // document
+    //   .querySelector("#defaultCanvas0")
+    //   .style.setProperty("width", `${config.width}px`, "important");
+    // document
+    //   .querySelector("#defaultCanvas0")
+    //   .style.setProperty("height", `${config.height}px`, "important");
 
     drawBackground(255);
     stroke(255);
     clusters.forEach((cluster) => {
       switch (cluster.metadata.type) {
         case "bouncy":
-          currentPoints -= 20;
+          currentPoints -= 20 * platformFactor;
           break;
         case "temp":
-          currentPoints -= 4;
+          currentPoints -= 4 * platformFactor;
           break;
         case "slow":
-          currentPoints -= 7;
+          currentPoints -= 7 * platformFactor;
           break;
         default:
           break;
@@ -280,12 +282,16 @@ const Game = (() => {
 
     highScore = currentPoints - currentTime;
 
+    if (highScore < 0) {
+      highScore = 0;
+      window.location.reload();
+    }
     scoreText = `Highscore: ${highScore}s`;
   }
 
   function displayHighScore() {
     fill(255);
-    textSize(32);
+    textSize(32 * smallFactor);
     text(scoreText, 50, 50);
   }
 
@@ -416,10 +422,10 @@ const Game = (() => {
   }
 
   function createGoal() {
-    goal = createSprite(config.width - 100, 50);
+    goal = createSprite(config.width - 30, 25);
     goal.img = goalImage;
     goal.collider = "static";
-    goal.scale = 0.5;
+    goal.scale = 0.5 * smallFactor;
     goal.color = "red";
   }
 

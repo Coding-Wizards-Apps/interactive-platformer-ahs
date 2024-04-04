@@ -142,6 +142,9 @@ const WebcamModule = (() => {
     if (!backgroundColor) {
       return false;
     }
+    if (!backgroundColor.rgbColor) {
+      return false;
+    }
     const backgroundRGB = backgroundColor.rgbColor.split(",");
     return (
       color[0] === backgroundRGB[0] &&
