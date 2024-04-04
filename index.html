@@ -40,7 +40,7 @@
           type="range"
           id="maxEucledianDistance"
           value="250"
-          min="100"
+          min="50"
           max="700"
           data-variable-name="maxEucledianDistance"
         /><br />
@@ -52,7 +52,7 @@
           type="range"
           id="whiteFactor"
           value="1.5"
-          min="1"
+          min=".8"
           max="1.5"
           step="0.1"
           data-variable-name="whiteFactor"
@@ -75,57 +75,12 @@
     <div class="playbutton" id="playButton">Hold down and let go to play</div>
     <div id="canvasPlay" class="canvasPlay"></div>
     <div id="highscore" class="highscore"></div>
+    <div id="highscore-list" class="highscore-list"></div>
     <script src="./js/ntc.js"></script>
     <script src="./libs/p5.js"></script>
     <script src="./libs/planck.min.js"></script>
     <script src="./libs/p5play.js"></script>
-    <script>
-      document
-        .getElementById("lowerThresholdFactor")
-        .addEventListener("input", function () {
-          document.getElementById("lowerThresholdFactorValue").textContent =
-            this.value;
-        });
-      document
-        .getElementById("upperThresholdFactor")
-        .addEventListener("input", function () {
-          document.getElementById("upperThresholdFactorValue").textContent =
-            this.value;
-        });
-      document
-        .getElementById("maxEucledianDistance")
-        .addEventListener("input", function () {
-          document.getElementById("maxEucledianDistanceValue").textContent =
-            this.value;
-        });
-      document
-        .getElementById("whiteFactor")
-        .addEventListener("input", function () {
-          document.getElementById("whiteFactorValue").textContent = this.value;
-        });
-      window.addEventListener("DOMContentLoaded", (event) => {
-        let configSliders = localStorage.getItem("configSliders");
-        if (configSliders) {
-          configSliders = JSON.parse(configSliders);
-          document.getElementById("lowerThresholdFactor").value =
-            configSliders.lowerThresholdFactor || 0.1;
-          document.getElementById("lowerThresholdFactorValue").textContent =
-            configSliders.lowerThresholdFactor || 0.1;
-          document.getElementById("upperThresholdFactor").value =
-            configSliders.upperThresholdFactor || 3;
-          document.getElementById("upperThresholdFactorValue").textContent =
-            configSliders.upperThresholdFactor || 3;
-          document.getElementById("maxEucledianDistance").value =
-            configSliders.maxEucledianDistance || 250;
-          document.getElementById("maxEucledianDistanceValue").textContent =
-            configSliders.maxEucledianDistance || 250;
-          document.getElementById("whiteFactor").value =
-            configSliders.whiteFactor || 1.5;
-          document.getElementById("whiteFactorValue").textContent =
-            configSliders.whiteFactor || 1.5;
-        }
-      });
-    </script>
+    <script src="./js/ui-scripts.js"></script>
     <script src="./js/scripts.js" type="module"></script>
   </body>
 </html>

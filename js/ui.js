@@ -82,6 +82,8 @@ function playButtonClicked() {
     Game.setup(WebcamModule.getClusters());
   } else {
     Game.resetGame();
+    // Reload the page to start the game again
+    window.location.reload();
   }
   gameStarted = true;
 }

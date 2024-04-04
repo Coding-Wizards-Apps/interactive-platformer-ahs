@@ -1,8 +1,13 @@
-import { createPlatforms, slowPlatformAction, tempPlatformAction, resetPlatform } from "./platforms.js";
+import {
+  createPlatforms,
+  slowPlatformAction,
+  tempPlatformAction,
+  resetPlatform,
+} from "./platforms.js";
 
 const Game = (() => {
   let playOnline = false;
-  let enemyFactor = .5;
+  let enemyFactor = 0.5;
   let config = {
     width: window.innerWidth,
     height: playOnline ? window.innerHeight * 1.1 : window.innerHeight * 1,
@@ -71,7 +76,7 @@ const Game = (() => {
     createFloor();
     createBorders();
     createPlayer();
-    console.log("clusters", clusters);  
+    console.log("clusters", clusters);
     platforms = createPlatforms(clusters, config, canvas);
     createGoal();
     // create some enemies at random positions
@@ -93,9 +98,9 @@ const Game = (() => {
     document
       .querySelector("#defaultCanvas0")
       .style.setProperty("height", `${config.height}px`, "important");
-    
+
     drawBackground(255);
-    stroke(255)
+    stroke(255);
   }
 
   function draw() {
@@ -105,7 +110,6 @@ const Game = (() => {
     updateEnemyMovement();
     handlePlayerMovement();
     // checkBulletEnemyCollision();
-    checkPlayerEnemyCollision();
     checkPlatformCollision();
     checkPlayerGoalCollision();
     updateHighScore();
@@ -119,7 +123,6 @@ const Game = (() => {
     displayHighScore();
   }
 
-  
   function createEnemies(platforms) {
     for (let i = 0; i < platforms.length; i++) {
       let platform = platforms[i];
@@ -136,25 +139,24 @@ const Game = (() => {
         platform.lastTouched = Date.now();
         if (platform.type === "bouncy") {
           player.velocity.y = -10;
-          if(!platform.action){
+          if (!platform.action) {
             slowPlatformAction(platform);
-            }
+          }
         } else if (platform.type === "slow") {
           player.velocity.x = playerDirection * 1;
-          console.log("platform.action", platform.action  )
-          
+          console.log("platform.action", platform.action);
         } else if (platform.type === "temp") {
           setTimeout(() => {
             platform.color = "green";
             tempPlatformAction(platform);
           }, 1000);
-            platform.color = "blue";
+          platform.color = "blue";
         } else if (platform.type === "slippery") {
           player.velocity.x = playerDirection * 3;
         }
       }
     }
-    platforms.forEach(platform => {
+    platforms.forEach((platform) => {
       if (platform.lastTouched) {
         if (Date.now() - platform.lastTouched > 3000) {
           resetPlatform(platform);
@@ -183,7 +185,11 @@ const Game = (() => {
     if (!keyIsDown(UP_ARROW) && !keyIsDown(87) && player.velocity.y < 0) {
       player.velocity.y += 1;
     }
-    if (player.position.x < 0 || player.position.x > config.width || player.position.y > config.height) {
+    if (
+      player.position.x < 0 ||
+      player.position.x > config.width ||
+      player.position.y > config.height
+    ) {
       resetGame();
     }
   }
@@ -205,16 +211,13 @@ const Game = (() => {
     }
   }
 
-  function checkPlayerEnemyCollision() {
-    for (let i = 0; i < enemies.length; i++) {
-      if (player.collide(enemies[i])) {
-        resetGame();
-        break;
-      }
+  function checkPlayerEnemyCollision(enemy) {
+    if (player.collide(enemy)) {
+      resetGame();
+      return true;
     }
   }
 
-  
   function updateEnemyMovement() {
     for (let i = 0; i < enemies.length; i++) {
       let enemy = enemies[i];
@@ -255,6 +258,7 @@ const Game = (() => {
       ) {
         enemy.velocity.y = -10; // Adjust the jump velocity as needed
       }
+      checkPlayerEnemyCollision(enemy);
     }
   }
 
@@ -402,7 +406,7 @@ const Game = (() => {
   }
 
   function drawBackground(opacity = 255) {
-    tint(255, opacity)
+    tint(255, opacity);
     image(backgroundImage, 0, 0, config.width, config.height);
     tint(255, 255);
   }

@@ -377,6 +377,11 @@ const WebcamModule = (() => {
       video.stop();
       video.remove();
     },
+    startWebcam: () => {
+      video = createCapture(VIDEO);
+      video.size(newWidth, newHeight);
+      video.hide();
+    },
     updateValue,
     updateColorPalette,
     getCanvasDimensions,
