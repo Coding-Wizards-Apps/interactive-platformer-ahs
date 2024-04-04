@@ -7,7 +7,8 @@ import {
   initializeCloseButton,
   initializeInputElements,
   initializePlayButton,
-  playButtonClicked
+  playButtonClicked,
+  loadLocalStorageUIConfig,
 } from "./ui.js";
 
 
@@ -49,6 +50,11 @@ function keyPressed() {
       keyPressTimeout = null;
     }
   }
+  if (key === 'r') {
+    if (keyIsDown(82)) { // 82 is the ASCII code for 'r'
+      Game.resetGame();
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -56,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   initializeInputElements();
   initializePlayButton();
+  loadLocalStorageUIConfig();
   // overlay.style.display = "block";
   window.preload = preload;
   window.setup = setup;

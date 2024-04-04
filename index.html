@@ -9,6 +9,16 @@
   </head>
   <body>
     <div class="webcamUI hidden" id="webcamUI">
+      <!-- <div>
+        <div>
+          <label for="showVideo">Show Video:</label>
+          <input type="checkbox" id="showVideo" />
+        </div>
+        <div>
+          <label for="showClusters">Show Clusters:</label>
+          <input type="checkbox" id="showClusters" />
+        </div>
+      </div> -->
       <div>
         <label for="lowerThresWoldFactor">Lower Threshold Factor:</label>
         <input
@@ -22,43 +32,43 @@
         />
         <p id="lowerThresholdFactorValue">0.1</p>
       </div>
-<div>
-  <label for="upperThresholdFactor">Upper Threshold Factor:</label>
-  <input
-    type="range"
-    id="upperThresholdFactor"
-    value="3"
-    min="0"
-    max="20"
-    data-variable-name="upperThresholdFactor"
-  /><br />
-  <p id="upperThresholdFactorValue">3</p>
-</div>
-<div>
-  <label for="maxEucledianDistance">Max eucledian distance</label>
-  <input
-    type="range"
-    id="maxEucledianDistance"
-    value="250"
-    min="100"
-    max="700"
-    data-variable-name="maxEucledianDistance"
-  /><br />
-  <p id="maxEucledianDistanceValue">250</p>
-</div>
-<div>
-  <label for="whiteFactor">White factor</label>
-  <input
-    type="range"
-    id="whiteFactor"
-    value="1.5"
-    min="1"
-    max="1.5"
-    step="0.1"
-    data-variable-name="whiteFactor"
-  /><br />
-  <p id="whiteFactorValue">1.5</p>
-</div>
+      <div>
+        <label for="upperThresholdFactor">Upper Threshold Factor:</label>
+        <input
+          type="range"
+          id="upperThresholdFactor"
+          value="3"
+          min="0"
+          max="20"
+          data-variable-name="upperThresholdFactor"
+        /><br />
+        <p id="upperThresholdFactorValue">3</p>
+      </div>
+      <div>
+        <label for="maxEucledianDistance">Max eucledian distance</label>
+        <input
+          type="range"
+          id="maxEucledianDistance"
+          value="250"
+          min="100"
+          max="700"
+          data-variable-name="maxEucledianDistance"
+        /><br />
+        <p id="maxEucledianDistanceValue">250</p>
+      </div>
+      <div>
+        <label for="whiteFactor">White factor</label>
+        <input
+          type="range"
+          id="whiteFactor"
+          value="1.5"
+          min="1"
+          max="1.5"
+          step="0.1"
+          data-variable-name="whiteFactor"
+        /><br />
+        <p id="whiteFactorValue">1.5</p>
+      </div>
       <label for="colorSelection">Color Selection:</label>
       <div id="colorSelection" class="colorSelection"></div>
     </div>
@@ -75,10 +85,10 @@
     <div class="playbutton" id="playButton">Hold down and let go to play</div>
     <div id="canvasPlay"></div>
     <div id="highscore" class="highscore"></div>
+    <script src="./js/ntc.js"></script>
     <script src="./libs/p5.js"></script>
     <script src="./libs/planck.min.js"></script>
     <script src="./libs/p5play.js"></script>
-    <script src="./js/scripts.js" type="module"></script>
     <script>
       document
         .getElementById("lowerThresholdFactor")
@@ -92,33 +102,40 @@
           document.getElementById("upperThresholdFactorValue").textContent =
             this.value;
         });
-        document
+      document
         .getElementById("maxEucledianDistance")
         .addEventListener("input", function () {
           document.getElementById("maxEucledianDistanceValue").textContent =
             this.value;
         });
-        document
+      document
         .getElementById("whiteFactor")
         .addEventListener("input", function () {
+          document.getElementById("whiteFactorValue").textContent = this.value;
+        });
+      window.addEventListener("DOMContentLoaded", (event) => {
+        let configSliders = localStorage.getItem("configSliders");
+        if (configSliders) {
+          configSliders = JSON.parse(configSliders);
+          document.getElementById("lowerThresholdFactor").value =
+            configSliders.lowerThresholdFactor || 0.1;
+          document.getElementById("lowerThresholdFactorValue").textContent =
+            configSliders.lowerThresholdFactor || 0.1;
+          document.getElementById("upperThresholdFactor").value =
+            configSliders.upperThresholdFactor || 3;
+          document.getElementById("upperThresholdFactorValue").textContent =
+            configSliders.upperThresholdFactor || 3;
+          document.getElementById("maxEucledianDistance").value =
+            configSliders.maxEucledianDistance || 250;
+          document.getElementById("maxEucledianDistanceValue").textContent =
+            configSliders.maxEucledianDistance || 250;
+          document.getElementById("whiteFactor").value =
+            configSliders.whiteFactor || 1.5;
           document.getElementById("whiteFactorValue").textContent =
-            this.value;
-        });
-        window.addEventListener('DOMContentLoaded', (event) => {
-          let configSliders = localStorage.getItem('configSliders');
-          if (configSliders) {
-            configSliders = JSON.parse(configSliders);
-            document.getElementById('lowerThresholdFactor').value = configSliders.lowerThresholdFactor || 0.1;
-            document.getElementById('lowerThresholdFactorValue').textContent = configSliders.lowerThresholdFactor || 0.1;
-            document.getElementById('upperThresholdFactor').value = configSliders.upperThresholdFactor || 3;
-            document.getElementById('upperThresholdFactorValue').textContent = configSliders.upperThresholdFactor || 3;
-            document.getElementById('maxEucledianDistance').value = configSliders.maxEucledianDistance || 250;
-            document.getElementById('maxEucledianDistanceValue').textContent = configSliders.maxEucledianDistance || 250;
-            document.getElementById('whiteFactor').value = configSliders.whiteFactor || 1.5;
-            document.getElementById('whiteFactorValue').textContent = configSliders.whiteFactor || 1.5;
-          }
-        });
+            configSliders.whiteFactor || 1.5;
+        }
+      });
     </script>
-
+    <script src="./js/scripts.js" type="module"></script>
   </body>
 </html>

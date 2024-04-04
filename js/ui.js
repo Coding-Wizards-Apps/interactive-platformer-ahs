@@ -17,6 +17,7 @@ async function createColorCheckboxes() {
         checkbox.id = color.id;
         checkbox.name = "color";
         checkbox.value = color.value;
+        checkbox.setAttribute("data-string-color", color.name);
         if (color.default) {
           checkbox.checked = true;
           let defaultColor = color.value.split(",");
@@ -33,30 +34,26 @@ async function createColorCheckboxes() {
         // Add event listener to each checkbox
         checkbox.addEventListener("change", colorCheckboxChanged);
         colorSelectionDiv.appendChild(div);
-      }
-      );
-    }).then(() => {
+      });
+    })
+    .then(() => {
       colorCheckboxChanged();
     })
     .catch((error) => console.error("Error:", error));
-    console.log("Default colors:", defaultColors);
+  console.log("Default colors:", defaultColors);
 }
-
 
 function colorCheckboxChanged() {
   let selectedColors = [];
-          document
-            .querySelectorAll('input[type="checkbox"]:checked')
-            .forEach(function (cb) {
-              let color = cb.value.split(",");
-              selectedColors.push(color);
-            });
-          console.log(selectedColors); // You can see the selected colors array in the console
-          // Assuming you have a WebcamModule with an updateColorPalette function
-          WebcamModule.updateColorPalette(selectedColors);
-        };
-
-
+  document
+    .querySelectorAll('input[type="checkbox"]:checked')
+    .forEach(function (cb) {
+      let color = cb.value.split(",");
+      selectedColors.push(color);
+    });
+  // Assuming you have a WebcamModule with an updateColorPalette function
+  WebcamModule.updateColorPalette(selectedColors);
+}
 
 function initializeCloseButton() {
   const closeButton = document.getElementById("closeButton");
@@ -74,26 +71,27 @@ async function initializeInputElements() {
       const inputId = event.target.id;
       const variableName = event.target.getAttribute("data-variable-name");
       updateValue(inputId, variableName);
-      
     });
   });
 }
 
 function playButtonClicked() {
   console.log("Play button clicked");
-      playButton.style.display = "none";
+  playButton.style.display = "none";
 
-      WebcamModule.stopWebcam();
-      if(!gameStarted){
-      Game.setup(WebcamModule.getClusters());
-      }
-      gameStarted = true;
+  WebcamModule.stopWebcam();
+  if (!gameStarted) {
+    Game.setup(WebcamModule.getClusters());
+  } else {
+    Game.resetGame();
+  }
+  gameStarted = true;
 }
 
 function initializePlayButton() {
   const playButton = document.querySelector("#playButton");
   if (playButton) {
-    playButton.addEventListener("click", playButtonClicked  );
+    playButton.addEventListener("click", playButtonClicked);
   } else {
     console.error("Play button not found in the DOM");
   }
@@ -104,6 +102,53 @@ function updateValue(inputId, variableName) {
   WebcamModule.updateValue(variableName, newValue);
   // window[variableName] = newValue;
   console.log(`Updated ${variableName}:`, newValue);
+  // Store all the values from the UI in a localStorage element "uiConfig"
+  updateLocalStorageUIConfig();
+}
+
+function updateLocalStorageUIConfig() {
+  let uiConfig = {};
+  const inputElements = document.querySelectorAll("input");
+  inputElements.forEach((inputElement) => {
+    const variableName = inputElement.getAttribute("data-variable-name");
+    const value = parseFloat(inputElement.value);
+    uiConfig[variableName] = value;
+  });
+  const colorCheckboxes = document.querySelectorAll(
+    'input[name="color"]:checked'
+  );
+  colorCheckboxes.forEach((checkbox) => {
+    const colorValue = checkbox.value;
+    uiConfig[checkbox.id] = colorValue;
+  });
+  localStorage.setItem("uiConfig", JSON.stringify(uiConfig));
+}
+
+function loadLocalStorageUIConfig() {
+  let uiConfig = JSON.parse(localStorage.getItem("uiConfig"));
+  if (uiConfig) {
+    console.log("Loaded UI config from localStorage:", uiConfig);
+    const inputElements = document.querySelectorAll("input");
+    inputElements.forEach((inputElement) => {
+      const variableName = inputElement.getAttribute("data-variable-name");
+      if (uiConfig[variableName]) {
+        inputElement.value = uiConfig[variableName];
+        console.log(`Updated ${variableName}:`, uiConfig[variableName]);
+        const correspondingTextElement = document.querySelector(`#${variableName}Value`);
+        console.log("Corresponding text element:", correspondingTextElement);
+        if (correspondingTextElement) {
+          correspondingTextElement.textContent = uiConfig[variableName];
+        }
+        WebcamModule.updateValue(variableName, uiConfig[variableName]);
+      }
+    });
+    const colorCheckboxes = document.querySelectorAll('input[name="color"]');
+    colorCheckboxes.forEach((checkbox) => {
+      if (uiConfig[checkbox.id]) {
+        checkbox.checked = true;
+      }
+    });
+  }
 }
 
 // Call the function to create checkboxes
@@ -113,5 +158,6 @@ export {
   initializeInputElements,
   initializePlayButton,
   gameStarted,
-  playButtonClicked
+  playButtonClicked,
+  loadLocalStorageUIConfig
 };

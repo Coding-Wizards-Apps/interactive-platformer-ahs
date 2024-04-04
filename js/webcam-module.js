@@ -15,7 +15,8 @@ const WebcamModule = (() => {
   let lowerThreshold = lowerThresholdFactor * scaleDownFactor;
   let upperThreshold = upperThresholdFactor * scaleDownFactor;
 
-  const displayVideo = true;
+  let displayVideo = false;
+  let displayClusters = true;
   let newWidth = originalPixelW / scaleDownFactor;
   let newHeight = originalPixelH / scaleDownFactor;
   let clusters = [];
@@ -51,7 +52,12 @@ const WebcamModule = (() => {
           document.querySelector(".overlay").style.display = "block";
         }
       }
-
+      if (event.key === "v") {
+        displayVideo = !displayVideo;
+      }
+      if (event.key === "c") {
+        displayClusters = !displayClusters;
+      }
       canvas.style.width = `${newWidth}px`;
       canvas.style.height = `${newHeight}px`;
     });
@@ -81,7 +87,9 @@ const WebcamModule = (() => {
     clusters = clusters.map((cluster) => {
       return addCustomProperties(cluster);
     });
-    drawClusterShapes();
+    if (displayClusters) {
+      drawClusterShapes();
+    }
   }
 
   function processPixels(pixels) {
@@ -103,13 +111,23 @@ const WebcamModule = (() => {
       // added euclidian distance to filter out colors that are too far from the palette
       if (
         colorIsBlackOrWhite(color) ||
-        euclideanDistance(color, [r, g, b]) > maxEuclideanDistance
+        euclideanDistance(color, [r, g, b]) > maxEuclideanDistance ||
+        colorIsBackground(color)
       ) {
         continue;
       }
 
       updateClusters(color, coordX, coordY, addedToCluster);
     }
+  }
+
+  function colorIsBackground(color) {
+    const backgroundColor = colorPalette[1];
+    return (
+      color[0] === backgroundColor[0] &&
+      color[1] === backgroundColor[1] &&
+      color[2] === backgroundColor[2]
+    );
   }
 
   function colorIsBlackOrWhite(color) {
@@ -180,9 +198,9 @@ const WebcamModule = (() => {
 
   function drawClusterShapes() {
     for (let cluster of clusters) {
-      fill(cluster.color[0], cluster.color[1], cluster.color[2], 50);
-      tint(cluster.color[0], cluster.color[1], cluster.color[2]);
-      stroke(255, 255, 255, 255);
+      fill(cluster.color[0], cluster.color[1], cluster.color[2], 20);
+      tint(255, 2);
+      stroke(0, 0, 0, 255);
       rect(
         cluster.minX * scaleDownFactor,
         cluster.minY * scaleDownFactor,
@@ -214,10 +232,10 @@ const WebcamModule = (() => {
     return Math.sqrt(sum);
   }
 
-
   function areNeighbors(pixelA, pixelB) {
     const dx = Math.abs(pixelA.coordX - pixelB.coordX);
     const dy = Math.abs(pixelA.coordY - pixelB.coordY);
+    return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
     return dx <= 1 && dy <= 1;
   }
 
@@ -234,28 +252,9 @@ const WebcamModule = (() => {
     const normalizedMaxY = (maxY / newHeight) * 100;
     const pixelWidth = maxX - minX + 1;
     const pixelHeight = maxY - minY + 1;
-    const normalizedWidth = (pixelWidth / newWidth) * scaleDownFactor ;
+    const normalizedWidth = (pixelWidth / newWidth) * scaleDownFactor;
     const normalizedHeight = (pixelHeight / newHeight) * scaleDownFactor;
 
-    // if (pixelWidth === 1 && pixelHeight === 4) {
-    //   cluster.shape = "I-shaped";
-    // } else if (pixelWidth === 2 && pixelHeight === 3) {
-    //   cluster.shape = "J-shaped";
-    // } else if (
-    //   pixelWidth === 2 &&
-    //   pixelHeight === 3 &&
-    //   pixels.find((p) => p.coordX === minX + 1 && p.coordY === minY)
-    // ) {
-    //   cluster.shape = "L-shaped";
-    // } else if (pixelWidth === 3 && pixelHeight === 2) {
-    //   cluster.shape = "H-shaped";
-    // } else if (pixelWidth >= 2 && pixelHeight >= 2 && pixelWidth === pixelHeight) {
-    //   cluster.shape = "Rectangle-shaped";
-    // } else if (pixelWidth >= 2 && pixelHeight === 1) {
-    //   cluster.shape = "_-shaped";
-    // } else {
-    //   cluster.shape = "Unknown";
-    // }
 
     cluster = {
       ...cluster,
@@ -307,7 +306,6 @@ const WebcamModule = (() => {
       default:
         break;
     }
-    console.log(`Updated ${variableName}:`, newValue);
   }
 
   function updateColorPalette(newColorPalette) {
@@ -340,8 +338,10 @@ const WebcamModule = (() => {
     },
     updateValue,
     updateColorPalette,
-    getCanvasDimensions
+    getCanvasDimensions,
   };
 })();
 
 export default WebcamModule;
+
+

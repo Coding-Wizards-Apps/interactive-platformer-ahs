@@ -1,4 +1,4 @@
-import WebcamModule from "./webcam-module.js";
+import WebcamModule from "../js/webcam-module.js";
 
 class Platform {
   constructor(x, y, w, h, color) {
@@ -16,7 +16,7 @@ class Platform {
   }
 }
 
-function createPlatforms(clusters, ground, config, canvas) {
+function createPlatforms(clusters, config, canvas) {
   let platforms = [];
   let scaleFactor = 1;
 

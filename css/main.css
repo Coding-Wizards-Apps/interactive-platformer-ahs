@@ -13,6 +13,7 @@
 body {
     overflow: hidden;
     font-family: sans-serif;
+    display: relative;
 }
 
 main {
@@ -20,17 +21,25 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    /* margin: 40px; */
 }
 
 canvas {
-    margin: 0 auto !important;
+    /* margin: 0 auto !important; */
     image-rendering: pixelated;
 }
 
 
 #defaultCanvas0 {
-    width: 100vw !important;
-    height: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#defaultCanvas0, main {
+    /* margin: 40px; */
 }
 
 
@@ -105,6 +114,8 @@ canvas {
   top: 0%;
   right: 0%;
   font-family: sans-serif;
+  overflow: scroll;
+  max-height: 100%;
 }
 
 .webcamUI {

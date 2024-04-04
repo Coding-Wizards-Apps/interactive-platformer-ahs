@@ -1,6 +1,8 @@
-import WebcamModule from './webcam-module.js';
-function createPlatforms(clusters, ground, config, canvas) {
+import WebcamModule from "./webcam-module.js";
+function createPlatforms(clusters, config, canvas) {
   let platforms = new Group();
+  platforms.collider = "static";
+
   let clusterColors = clusters.map((cluster) => cluster.color);
   const uniqueColors = Array.from(
     new Set(clusterColors.map(JSON.stringify)),
@@ -8,21 +10,23 @@ function createPlatforms(clusters, ground, config, canvas) {
   );
   let platformTypes = [];
   const platformActionTypes = [
-    { type: 'bouncy', color: ['255', '0', '0'], stringColor: 'red' },
-    { type: 'slow', color: ['0', '255', '0'], stringColor: 'green' },
-    { type: 'temp', color: ['0', '0', '255'], stringColor: 'blue' },
+    { type: "bouncy", color: ["255", "0", "0"], stringColor: "red" },
+    { type: "slow", color: ["0", "255", "0"], stringColor: "green" },
+    { type: "temp", color: ["0", "0", "255"], stringColor: "blue" },
+    { type: "bouncy", color: ["128", "0", "128"], stringColor: "purple" },
+
   ];
   for (let color of uniqueColors) {
     let platform = new platforms.Group();
     let platformType = platformActionTypes.find((type) => {
       return color.toString() === type.color.toString();
     });
-    platform.type = platformType.type;
+    
+    platform.originalColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+    platform.type = platformType ? platformType : "normal";
     platform.color = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
     platformTypes.push(platform);
   }
-  // platforms.img = ground;
-  platforms.collider = 'static';
   let { width, height } = WebcamModule.getCanvasDimensions();
   let aspectRatioWebcam = width / height;
   let aspectRatioGame = config.width / config.height;
@@ -60,7 +64,52 @@ function createPlatform(platformType, config, x, y, w, h, color) {
   h = h * 5;
   let newPosX = x + w / 2;
   let newPosY = y + h / 2;
+
   let platform = new platformType.Sprite(newPosX, newPosY, w, h);
 }
 
-export { createPlatforms };
+function slowPlatformAction(platform) {
+  platform.action = true
+  let originalY = platform.y;
+  let direction = 1;
+  let speed = 1;
+  let bounceDistance = 10;
+
+  let intervalId = setInterval(() => {
+    platform.y += speed * direction;
+    bounceDistance -= speed;
+
+    if (bounceDistance <= 0) {
+      direction *= -1;
+      bounceDistance = 10;
+    }
+    if (ceil(platform.y) === ceil(originalY)) {
+      clearInterval(intervalId);
+      platform.action = false
+    }
+  }, 10);
+  platform.intervalId = intervalId;
+}
+
+function bouncyPlatformAction(platform) {}
+
+function tempPlatformAction(platform) {
+  platform.collider = "none";
+  platform.color = "rgba(0, 0, 0, 0)";
+}
+
+function resetPlatform(platform) {
+  platform.collider = "static";
+  platform.color = platform.originalColor;
+  if (platform.intervalId) {
+    clearInterval(platform.intervalId);
+  }
+}
+
+export {
+  createPlatforms,
+  slowPlatformAction,
+  bouncyPlatformAction,
+  tempPlatformAction,
+  resetPlatform,
+};

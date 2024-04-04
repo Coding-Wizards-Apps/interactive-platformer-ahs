@@ -1,8 +1,8 @@
-import { createPlatforms } from './platforms.js';
+import { createPlatforms, slowPlatformAction, tempPlatformAction, resetPlatform } from "./platforms.js";
 
 const Game = (() => {
   let playOnline = false;
-
+  let enemyFactor = .5;
   let config = {
     width: window.innerWidth,
 
@@ -13,18 +13,18 @@ const Game = (() => {
   let player = null;
   let playerDirection = 1;
   let playerSpeed = 2.5;
-  let playerImg = null;
+  let playerImage = null;
   let playerJumpVelocity = -5;
 
-  // Variables related to door
-  let door = null;
-  let doorImg = null;
+  // Variables related to goal
+  let goal = null;
+  let goalImage = null;
 
   // Variables related to time
   let startTime;
 
   // Variables related to environment
-  let sky = null;
+  let backgroundImage = null;
   let ground = null;
 
   // Variables related to game elements
@@ -36,7 +36,7 @@ const Game = (() => {
   // Variables related to scoring and display
   let highScore = 0;
   let scoreText = null;
-  let enemyImg = null;
+  let enemyImage = null;
   let bulletImg = null;
 
   let clusterList = null;
@@ -52,15 +52,15 @@ const Game = (() => {
   function displayHighScore() {
     fill(255);
     textSize(32);
-    text(scoreText, config.width - 200, 50);
+    text(scoreText, 50, 50);
   }
   function preload() {
-    sky = loadImage('assets/sky.png');
-    ground = loadImage('assets/platform.png');
-    // playerImg = loadImage("assets/Colorful_Super_ball.png");
-    doorImg = loadImage('assets/door.png');
-    bulletImg = loadImage('assets/dentures.png');
-    enemyImg = loadImage('assets/monster.png');
+    backgroundImage = loadImage("assets/Background.png");
+    // ground = loadImage("assets/platform.png");
+    playerImage = loadImage("assets/Player.png");
+    goalImage = loadImage("assets/Goal.png");
+    // bulletImg = loadImage("assets/dentures.png");
+    enemyImage = loadImage("assets/Enemy.png");
   }
 
   function setup(clusters) {
@@ -71,15 +71,12 @@ const Game = (() => {
     createFloor();
     createBorders();
     createPlayer();
-    platforms = createPlatforms(clusters, ground, config, canvas);
-    createDoor();
-    drawBackground();
+    platforms = createPlatforms(clusters, config, canvas);
+    createGoal();
     // create some enemies at random positions
-    for (let i = 0; i < 5; i++) {
-      createEnemy(config.width / 100, config.height / 100 - 20);
-    }
+    createEnemies(platforms);
     bullets = new Group();
-    bullets.img = bulletImg;
+    // bullets.img = bulletImg;
     bullets.scale = 0.1;
     for (let i = 0; i < enemies.length; i++) {
       for (let j = i + 1; j < enemies.length; j++) {
@@ -90,23 +87,27 @@ const Game = (() => {
     }
 
     document
-      .querySelector('#defaultCanvas0')
-      .style.setProperty('width', `${config.width}px`, 'important');
+      .querySelector("#defaultCanvas0")
+      .style.setProperty("width", `${config.width}px`, "important");
     document
-      .querySelector('#defaultCanvas0')
-      .style.setProperty('height', `${config.height}px`, 'important');
+      .querySelector("#defaultCanvas0")
+      .style.setProperty("height", `${config.height}px`, "important");
+    
+    drawBackground(255);
+    stroke(255)
   }
 
   function draw() {
-    clear();
-    handlePlayerMovement();
-    checkBulletEnemyCollision();
-    checkPlayerEnemyCollision();
+    fill(0, 15);
+    rect(0, 0, config.width, config.height);
+    drawBackground(30);
     updateEnemyMovement();
-    checkPlayerDoorCollision();
-    updateHighScore();
-    displayHighScore();
+    handlePlayerMovement();
+    // checkBulletEnemyCollision();
+    checkPlayerEnemyCollision();
     checkPlatformCollision();
+    checkPlayerGoalCollision();
+    updateHighScore();
     if (playOnline) {
       adjustCameraPosition();
     }
@@ -114,26 +115,51 @@ const Game = (() => {
     if (player.velocity.y > 20) {
       player.velocity.y = 0;
     }
+    displayHighScore();
+  }
+
+  function createEnemies(platforms) {
+    for (let i = 0; i < platforms.length; i++) {
+      let platform = platforms[i];
+      if (Math.random() < enemyFactor) {
+        createEnemy(platform);
+      }
+    }
   }
 
   function checkPlatformCollision() {
     for (let i = 0; i < platforms.length; i++) {
       let platform = platforms[i];
       if (player.collide(platform)) {
-        if (platform.type === 'bouncy') {
-          player.velocity.y = -20;
-        } else if (platform.type === 'slow') {
+        platform.lastTouched = Date.now();
+        if (platform.type === "bouncy") {
+          player.velocity.y = -10;
+          if(!platform.action){
+            slowPlatformAction(platform);
+            }
+        } else if (platform.type === "slow") {
           player.velocity.x = playerDirection * 1;
-        } else if (platform.type === 'temp') {
+          console.log("platform.action", platform.action  )
+          
+        } else if (platform.type === "temp") {
           setTimeout(() => {
-            player.collide(platform, false);
-          }, 3000);
-        }
-        else if (platform.type === "slippery"){
+            platform.color = "green";
+            tempPlatformAction(platform);
+          }, 1000);
+            platform.color = "blue";
+        } else if (platform.type === "slippery") {
           player.velocity.x = playerDirection * 3;
         }
       }
     }
+    platforms.forEach(platform => {
+      if (platform.lastTouched) {
+        if (Date.now() - platform.lastTouched > 3000) {
+          resetPlatform(platform);
+          delete platform.lastTouched;
+        }
+      }
+    });
   }
 
   function handlePlayerMovement() {
@@ -154,6 +180,9 @@ const Game = (() => {
 
     if (!keyIsDown(UP_ARROW) && !keyIsDown(87) && player.velocity.y < 0) {
       player.velocity.y += 1;
+    }
+    if (player.position.x < 0 || player.position.x > config.width || player.position.y > config.height) {
+      resetGame();
     }
   }
 
@@ -183,6 +212,7 @@ const Game = (() => {
     }
   }
 
+  
   function updateEnemyMovement() {
     for (let i = 0; i < enemies.length; i++) {
       let enemy = enemies[i];
@@ -226,47 +256,74 @@ const Game = (() => {
     }
   }
 
-  function checkPlayerDoorCollision() {
-    if (player.collide(door)) {
+  function checkPlayerGoalCollision() {
+    if (player.collide(goal)) {
       noLoop();
       let endTime = Date.now();
       let highscore = Math.floor((endTime - startTime) / 1000);
-      let highScoreElement = document.querySelector('#highscore');
+      let highScoreElement = document.querySelector("#highscore");
       highScoreElement.innerText = `High Score: ${highscore}s`;
-      highScoreElement.style.display = 'block';
+      highScoreElement.style.display = "block";
+      saveHighScore(highscore);
+      displayHighScores();
     }
   }
 
+  function displayHighScores() {
+    let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+    let highScoreList = document.querySelector("#highscore-list");
+    highScoreList.innerHTML = "";
+    for (let i = 0; i < highScores.length; i++) {
+      let li = document.createElement("li");
+      li.innerText = `${highScores[i].name}: ${highScores[i].score}s`;
+      highScoreList.appendChild(li);
+    }
+  }
+  function saveHighScore(highscore) {
+     
+    let playerName = "Player" + Math.floor(Math.random() * 1000);
+    if (playerName != null) {
+      let highScores = JSON.parse(localStorage.getItem("highScores")) || [];
+      let newScore = { name: playerName, score: highscore };
+      highScores.push(newScore);
+      highScores.sort((a, b) => b.score - a.score);
+      highScores.splice(10); // Keep only top 5 scores
+      localStorage.setItem("highScores", JSON.stringify(highScores));
+    }
+  }
   function adjustCameraPosition() {
     camera.y = player.y;
   }
 
   function resetGame() {
     // Reset player position
-    player.position.x = 50;
-    player.position.y = config.height - 50;
-    player.velocity.x = 0;
-    player.velocity.y = 0;
+    resetPlayer();
     // Reset enemy positions
-    for (let i = 0; i < enemies.length; i++) {
-      if (clusterList.length === 0) {
-        let x = Math.floor(Math.random() * config.width);
-        let y = Math.floor(Math.random() * config.height);
-        enemies[i].position.x = x;
-        enemies[i].position.y = y;
-      } else {
-        let cluster =
-          clusterList[Math.floor(Math.random() * clusterList.length)];
-        enemies[i].position.x = (cluster.pixels[0].coordX * config.width) / 100;
-        enemies[i].position.y =
-          (cluster.pixels[0].coordY * config.height) / 100 - 20;
-      }
+    resetEnemies(platforms);
+    startTime = Date.now();
+    // Reset platforms
+    for (let i = 0; i < platforms.length; i++) {
+      resetPlatform(platforms[i]);
     }
-
+    highScore = 0;
     // Remove allbullets
     for (let i = bulletInstances.length - 1; i >= 0; i--) {
       bulletInstances[i].remove();
     }
+  }
+
+  function resetPlayer() {
+    player.position.x = 50;
+    player.position.y = config.height - 50;
+    player.velocity.x = 0;
+    player.velocity.y = 0;
+  }
+
+  function resetEnemies(platforms) {
+    for (let i = 0; i < enemies.length; i++) {
+      enemies[i].remove();
+    }
+    createEnemies(platforms);
   }
 
   function shootBullet() {
@@ -292,7 +349,7 @@ const Game = (() => {
     floor.y = config.height - 5;
     floor.w = config.width;
     floor.h = 5;
-    floor.collider = 'static';
+    floor.collider = "static";
   }
 
   function createBorders() {
@@ -301,46 +358,52 @@ const Game = (() => {
     leftBorder.y = config.height / 2;
     leftBorder.w = 5;
     leftBorder.h = config.height;
-    leftBorder.collider = 'static';
+    leftBorder.collider = "static";
 
     let rightBorder = new Sprite();
     rightBorder.x = config.width + 5;
     rightBorder.y = config.height / 2;
     rightBorder.w = 5;
     rightBorder.h = config.height;
-    rightBorder.collider = 'static';
+    rightBorder.collider = "static";
   }
 
   function createPlayer() {
     player = new Sprite(50, 50, 125, 125);
     player.scale = 0.25;
-    player.img = playerImg;
+    player.img = playerImage;
     player.bounciness = 2;
     player.rotationLock = false;
     player.y = config.height - 50;
   }
 
-  function createEnemy(x, y) {
+  function createEnemy(platform) {
+    let x = platform.x;
+    let y = platform.y;
     let enemy = createSprite(x, y - 100);
-    enemy.img = enemyImg;
+    enemy.diameter = 50;
+    enemy.img = enemyImage;
     enemy.scale = 0.15;
     enemy.rotationLock = true;
     enemy.bounciness = 1;
+    enemy.originalX = x;
+    enemy.originalY = y;
+    enemy.platform = platform;
     enemies.push(enemy);
   }
 
-  function createDoor() {
-    door = createSprite(config.width - 100, 10);
-    // door.img = doorImg;
-    door.collider = 'static';
-    door.scale.x = 4.5;
-    door.color = 'red';
-    `    // door.addAnimation("glow", "assets/glow1.png", "assets/glow2.png", "assets/glow3.png");
-    // door.animation.play("glow");`;
+  function createGoal() {
+    goal = createSprite(config.width - 100, 50);
+    goal.img = goalImage;
+    goal.collider = "static";
+    goal.scale = 0.5;
+    goal.color = "red";
   }
 
-  function drawBackground() {
-    image(sky, 0, 0, config.width, config.height);
+  function drawBackground(opacity = 255) {
+    tint(255, opacity)
+    image(backgroundImage, 0, 0, config.width, config.height);
+    tint(255, 255);
   }
 
   return {

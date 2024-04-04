@@ -1,10 +1,11 @@
 {
   "colors": [
-    { "id": "red", "name": "red", "value": "255,0,0", "default": true},
-    { "id": "blue", "name": "blue", "value": "0,0,255", "default": true},
-    { "id": "green", "name": "green", "value": "0,255,0", "default": true },
+    { "id": "brown", "name": "brown", "value": "165,42,42", "default": true, "type": "background" },
+    { "id": "red", "name": "red", "value": "255,0,0", "default": true, "type": "bouncy"},
+    { "id": "blue", "name": "blue", "value": "0,0,255", "default": true, "type": "temp"},
+    { "id": "green", "name": "green", "value": "0,200,0", "default": true, "type": "slow"},
     { "id": "yellow", "name": "yellow", "value": "255,255,0" },
-    { "id": "purple", "name": "purple", "value": "128,0,128" },
+    { "id": "purple", "name": "purple", "value": "128,0,128", "default": true, "type": "bouncy"},
     { "id": "orange", "name": "orange", "value": "255,165,0" },
     { "id": "pink", "name": "pink", "value": "255,192,203" },
     { "id": "cyan", "name": "cyan", "value": "0,255,255" },
